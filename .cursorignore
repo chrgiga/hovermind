@@ -1,0 +1,32 @@
+# ==========================================
+# Archivos que la IA NO debe leer ni analizar
+# ==========================================
+
+# Archivos multimedia y binarios
+icons/
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.ico
+
+# Archivos empaquetados
+*.zip
+*.crx
+*.tar.gz
+
+# Datos sensibles y claves locales
+.env
+.env.local
+*.key
+keys.txt
+secrets.json
+
+# Archivos del sistema y control de versiones
+.git/
+.DS_Store
+Thumbs.db
+
+# Dependencias externas (Si las tuvieras en el futuro)
+node_modules/
+package-lock.json
