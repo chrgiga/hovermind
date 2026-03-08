@@ -1,2 +1,138 @@
-/* content.css */
-/* Estilos básicos para la extensión */
+/* =========================================
+   1. ESTILOS DEL BOTÓN RÁPIDO (QUICK BUTTON)
+   ========================================= */
+#hovermind-quick-btn {
+    position: fixed !important;
+    z-index: 2147483647;
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+
+    /* Flexbox para alinear el texto y la X */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#hovermind-quick-btn:hover {
+    background-color: #4338ca;
+}
+
+/* Evitamos que el texto interfiera con el clic del botón principal */
+#hovermind-action {
+    pointer-events: none;
+}
+
+/* Estilos para la "X" de ocultar */
+#hovermind-dismiss {
+    opacity: 0.6;
+    font-size: 16px;
+    line-height: 1;
+    padding-left: 8px;
+    border-left: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+}
+
+#hovermind-dismiss:hover {
+    opacity: 1;
+    color: #ffb3b3;
+}
+
+
+/* =========================================
+   2. ESTILOS DE LA VENTANA FLOTANTE (POPUP)
+   ========================================= */
+#hovermind-popup {
+    position: fixed !important;
+    z-index: 2147483647;
+    width: 350px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    border: 1px solid #e5e7eb;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow: hidden;
+    color: #1f2937;
+}
+
+/* Cabecera del popup */
+.hovermind-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f9fafb;
+    padding: 10px 15px;
+    border-bottom: 1px solid #e5e7eb;
+    cursor: grab;
+    /* Indicador visual de que se puede arrastrar */
+    user-select: none;
+    /* Evita que el texto del título se seleccione al arrastrar */
+}
+
+/* Cuando se está arrastrando activamente, la mano se cierra */
+.hovermind-header:active {
+    cursor: grabbing;
+}
+
+.hovermind-title {
+    font-weight: bold;
+    font-size: 14px;
+    color: #4f46e5;
+}
+
+/* Botón de cerrar (la X grande del popup) */
+#hovermind-close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #6b7280;
+    line-height: 1;
+    padding: 0;
+}
+
+#hovermind-close-btn:hover {
+    color: #111827;
+}
+
+/* Contenido interno del popup */
+.hovermind-content {
+    padding: 15px;
+    padding-bottom: 25px;
+    /* Más espacio al fondo para asegurar el scroll */
+    font-size: 14px;
+    line-height: 1.5;
+    max-height: 300px;
+    overflow-y: auto;
+    /* Scroll si el texto es muy largo */
+}
+
+/* Animación de carga */
+.hovermind-loading {
+    color: #6b7280;
+    font-style: italic;
+    animation: pulse 1.5s infinite;
+    margin-top: 10px;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.6;
+    }
+}
