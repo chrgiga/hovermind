@@ -33,14 +33,123 @@
             align-items: center;
             gap: 10px;
         }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        select,
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        select:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        button {
+            width: 100%;
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #4338ca;
+        }
+
+        #statusMessage {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            min-height: 20px;
+        }
+
+        .success {
+            color: #10b981;
+        }
+
+        .error {
+            color: #ef4444;
+        }
     </style>
 </head>
 
 <body>
+
     <div class="container">
         <h1>✨ HoverMind</h1>
-        <p style="font-size: 14px; color: #4b5563;">Opciones de la extensión en desarrollo.</p>
+        <p style="font-size: 14px; color: #4b5563; margin-bottom: 24px;">Configura tus proveedores de IA para analizar textos.</p>
+
+        <div class="form-group">
+            <label for="provider">Proveedor de IA principal:</label>
+            <select id="provider">
+                <option value="google">Búsqueda de Google y Wikipedia (Gratis)</option>
+                <option value="gemini">Google Gemini API</option>
+                <option value="openai">OpenAI (ChatGPT) API</option>
+                <option value="anthropic">Anthropic (Claude) API</option>
+                <option value="deepseek">DeepSeek API</option>
+            </select>
+        </div>
+
+        <div id="geminiGroup" class="form-group" style="display: none;">
+            <label for="geminiKey">API Key de Gemini:</label>
+            <input type="password" id="geminiKey" placeholder="AIzaSy...">
+            <div class="help-text">Obtén tu clave en Google AI Studio.</div>
+        </div>
+
+        <div id="openaiGroup" class="form-group" style="display: none;">
+            <label for="openaiKey">API Key de OpenAI:</label>
+            <input type="password" id="openaiKey" placeholder="sk-...">
+            <div class="help-text">Obtén tu clave en la plataforma de OpenAI.</div>
+        </div>
+
+        <div id="anthropicGroup" class="form-group" style="display: none;">
+            <label for="anthropicKey">API Key de Anthropic (Claude):</label>
+            <input type="password" id="anthropicKey" placeholder="sk-ant-...">
+            <div class="help-text">Obtén tu clave en la consola de Anthropic.</div>
+        </div>
+
+        <div id="deepseekGroup" class="form-group" style="display: none;">
+            <label for="deepseekKey">API Key de DeepSeek:</label>
+            <input type="password" id="deepseekKey" placeholder="sk-...">
+            <div class="help-text">Obtén tu clave en la plataforma de DeepSeek.</div>
+        </div>
+
+        <button id="saveBtn">Guardar Configuración</button>
+        <div id="statusMessage"></div>
     </div>
+
     <script src="options.js"></script>
 </body>
 

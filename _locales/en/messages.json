@@ -1,0 +1,22 @@
+{
+  "extName": { "message": "HoverMind" },
+  "extDesc": { "message": "Select any text to get explanations, translations, and context using your own AI APIs." },
+  "loading": { "message": "Loading AI response..." },
+  "analyzedText": { "message": "Analyzed text:" },
+  "missingKey": { "message": "❌ You haven't configured your API Key." },
+  "configBtn": { "message": "⚙️ Configure API Key" },
+  "searchGoogle": { "message": "🔍 Search on Google" },
+  "wikiTitle": { "message": "📖 Wikipedia:" },
+  "readMore": { "message": "Read more ↗" },
+  "noWiki": { "message": "No results found on Wikipedia." },
+  "saveSuccess": { "message": "Settings saved successfully!" },
+  "systemPrompt": { "message": "You are a helpful browser-integrated assistant. Explain, translate, or provide context for the selected text. Be clear, direct, and concise." },
+  "systemPromptGemini": { "message": "You are a helpful browser-integrated assistant. Explain, translate, or provide context for the selected text. Be clear, direct, and concise.\n\nText: " },
+  "unexError": { "message": "❌ Unexpected error: " },
+  "aiFailed": { "message": "AI failed (" },
+  "alternatives": { "message": "). Alternatives:" },
+  "errOpenAI": { "message": "Incorrect OpenAI key or insufficient quota" },
+  "errGemini": { "message": "Incorrect Google key" },
+  "errAnthropic": { "message": "Incorrect Anthropic key" },
+  "errDeepSeek": { "message": "Incorrect DeepSeek key" }
+}

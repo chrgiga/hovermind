@@ -1,0 +1,22 @@
+{
+  "extName": { "message": "HoverMind" },
+  "extDesc": { "message": "Selecciona cualquier texto y obtén explicaciones, traducciones y contexto usando tus propias APIs de IA." },
+  "loading": { "message": "Cargando respuesta de la IA..." },
+  "analyzedText": { "message": "Texto analizado:" },
+  "missingKey": { "message": "❌ No has configurado tu API Key." },
+  "configBtn": { "message": "⚙️ Configurar API Key" },
+  "searchGoogle": { "message": "🔍 Buscar en Google" },
+  "wikiTitle": { "message": "📖 Wikipedia:" },
+  "readMore": { "message": "Leer más ↗" },
+  "noWiki": { "message": "No se encontraron resultados en Wikipedia." },
+  "saveSuccess": { "message": "¡Configuración guardada con éxito!" },
+  "systemPrompt": { "message": "Eres un asistente útil integrado en el navegador. Explica, traduce o da contexto sobre el texto seleccionado. Sé claro, directo y conciso." },
+  "systemPromptGemini": { "message": "Eres un asistente útil integrado en el navegador. Explica, traduce o da contexto sobre el texto seleccionado. Sé claro, directo y conciso.\n\nTexto: " },
+  "unexError": { "message": "❌ Error inesperado: " },
+  "aiFailed": { "message": "La IA falló (" },
+  "alternatives": { "message": "). Alternativas:" },
+  "errOpenAI": { "message": "Llave de OpenAI incorrecta o sin saldo" },
+  "errGemini": { "message": "Llave de Google incorrecta" },
+  "errAnthropic": { "message": "Llave de Anthropic incorrecta" },
+  "errDeepSeek": { "message": "Llave de DeepSeek incorrecta" }
+}
