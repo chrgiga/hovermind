@@ -16,25 +16,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function handleAIStreamRequest(request, port) {
+    if (request.mode === 'translation') {
+        await callFreeTranslation(request.text, request.lang, port);
+        return;
+    }
+
     chrome.storage.sync.get(['provider', 'geminiKey', 'openaiKey', 'anthropicKey', 'deepseekKey'], async (config) => {
         const provider = config.provider || 'google';
 
         try {
             if (provider === 'openai') {
                 if (!config.openaiKey) return port.postMessage({ errorHtml: getMissingKeyUI() });
-                await callOpenAIStream(request.text, config.openaiKey, port, request.mode, request.lang);
+                await callOpenAIStream(request.text, config.openaiKey, port, request.lang);
             }
             else if (provider === 'gemini') {
                 if (!config.geminiKey) return port.postMessage({ errorHtml: getMissingKeyUI() });
-                await callGeminiStream(request.text, config.geminiKey, port, request.mode, request.lang);
+                await callGeminiStream(request.text, config.geminiKey, port, request.lang);
             }
             else if (provider === 'anthropic') {
                 if (!config.anthropicKey) return port.postMessage({ errorHtml: getMissingKeyUI() });
-                await callAnthropicStream(request.text, config.anthropicKey, port, request.mode, request.lang);
+                await callAnthropicStream(request.text, config.anthropicKey, port, request.lang);
             }
             else if (provider === 'deepseek') {
                 if (!config.deepseekKey) return port.postMessage({ errorHtml: getMissingKeyUI() });
-                await callDeepSeekStream(request.text, config.deepseekKey, port, request.mode, request.lang);
+                await callDeepSeekStream(request.text, config.deepseekKey, port, request.lang);
             }
             else {
                 port.postMessage({ errorHtml: await buildFallbackUI(text) });
@@ -86,14 +91,8 @@ async function readStream(response, port, extractTextFn) {
 }
 
 // --- GENERADOR DINÁMICO DE PROMPTS ---
-function buildDynamicPrompt(mode, lang, text = '') {
-    let prompt = "";
-
-    if (mode === 'translation') {
-        prompt = lang == 'es' ? "Eres un traductor experto y profesional. Tu tarea es traducir el texto indicado directamente al español. REGLA ESTRICTA: Devuelve ÚNICAMENTE la traducción, sin añadir explicaciones, notas ni comillas adicionales." : "You are an expert and professional translator. Your task is to translate the indicated text directly into english. STRICT RULE: Return ONLY the translation, without adding explanations, notes, or additional quotation marks.";
-    } else {
-        prompt = lang == 'es' ? "Eres un asistente experto. Tu tarea es analizar el texto indicado. REGLA ESTRICTA: Debes responder SIEMPRE en español, sin importar en qué idioma esté el texto original. Explica de forma clara y concisa el contexto o significado del texto." : "You are an expert assistant. Your task is to analyze the indicated text. STRICT RULE: You must ALWAYS answer in english, regardless of the original language. Clearly and concisely explain the context or meaning of the text.";
-    }
+function buildDynamicPrompt(lang, text = '') {
+    let prompt = lang == 'es' ? "Eres un asistente experto. Tu tarea es analizar el texto indicado. REGLA ESTRICTA: Debes responder SIEMPRE en español, sin importar en qué idioma esté el texto original. Explica de forma clara y concisa el contexto o significado del texto." : "You are an expert assistant. Your task is to analyze the indicated text. STRICT RULE: You must ALWAYS answer in english, regardless of the original language. Clearly and concisely explain the context or meaning of the text.";
 
     if (text.length > 0) {
         prompt += "\n\n" + (lang == 'es' ? "Texto indicado" : "Indicated text") + ": " + text;
@@ -102,9 +101,33 @@ function buildDynamicPrompt(mode, lang, text = '') {
     return prompt;
 }
 
+// --- TRADUCTOR GRATUITO (MyMemory API) ---
+async function callFreeTranslation(text, targetLang, port) {
+    // targetLang será 'es' o 'en'. Autodetect averigua el idioma de origen.
+    const langPair = `Autodetect|${targetLang}`;
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`;
+
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.responseData && data.responseData.translatedText) {
+            // Enviamos el texto completo al túnel. 
+            // ¡El motor de escritura fluida del content.js se encargará de animarlo!
+            port.postMessage({ chunk: data.responseData.translatedText });
+            port.postMessage({ done: true });
+        } else {
+            throw new Error("No se pudo traducir el texto.");
+        }
+    } catch (error) {
+        port.postMessage({ errorHtml: await buildFallbackUI(text, "Error en el servicio de traducción gratuito.") });
+        port.postMessage({ done: true });
+    }
+}
+
 // Proveedores
-async function callOpenAIStream(text, key, port, mode, lang) {
-    const prompt = buildDynamicPrompt(mode, lang);
+async function callOpenAIStream(text, key, port, lang) {
+    const prompt = buildDynamicPrompt(lang);
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
@@ -118,8 +141,8 @@ async function callOpenAIStream(text, key, port, mode, lang) {
     await readStream(response, port, (parsed) => parsed.choices?.[0]?.delta?.content);
 }
 
-async function callGeminiStream(text, key, port, mode, lang) {
-    const prompt = buildDynamicPrompt(mode, lang, text);
+async function callGeminiStream(text, key, port, lang) {
+    const prompt = buildDynamicPrompt(lang, text);
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:streamGenerateContent?alt=sse&key=${key}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -129,8 +152,8 @@ async function callGeminiStream(text, key, port, mode, lang) {
     await readStream(response, port, (parsed) => parsed.candidates?.[0]?.content?.parts?.[0]?.text);
 }
 
-async function callAnthropicStream(text, key, port, mode, lang) {
-    const prompt = buildDynamicPrompt(mode, lang);
+async function callAnthropicStream(text, key, port, lang) {
+    const prompt = buildDynamicPrompt(lang);
     const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -154,8 +177,8 @@ async function callAnthropicStream(text, key, port, mode, lang) {
     });
 }
 
-async function callDeepSeekStream(text, key, port, mode, lang) {
-    const prompt = buildDynamicPrompt(mode, lang);
+async function callDeepSeekStream(text, key, port, lang) {
+    const prompt = buildDynamicPrompt(lang);
     const response = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
