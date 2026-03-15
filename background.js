@@ -1,3 +1,31 @@
+// --- MOTOR DE CACHÉ ---
+function getCache(text, mode, lang) {
+    return new Promise(resolve => {
+        chrome.storage.local.get(['hovermind_cache'], (res) => {
+            const cache = res.hovermind_cache || {};
+            const key = `${mode}_${lang}_${text}`;
+            resolve(cache[key] || null);
+        });
+    });
+}
+
+function setCache(text, mode, lang, responseText) {
+    chrome.storage.local.get(['hovermind_cache'], (res) => {
+        let cache = res.hovermind_cache || {};
+        const key = `${mode}_${lang}_${text}`;
+        cache[key] = responseText;
+
+        // Límite de seguridad: guardamos solo las últimas 100 consultas para no saturar Chrome
+        const keys = Object.keys(cache);
+        if (keys.length > 100) {
+            delete cache[keys[0]]; // Borra el registro más antiguo
+        }
+
+        chrome.storage.local.set({ hovermind_cache: cache });
+    });
+}
+
+// --- CONEXIONES ---
 chrome.runtime.onConnect.addListener((port) => {
     if (port.name === "hovermind-stream") {
         port.onMessage.addListener((request) => {
@@ -16,30 +44,52 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function handleAIStreamRequest(request, port) {
-    if (request.mode === 'translation') {
-        await callFreeTranslation(request.text, request.lang, port);
+    const text = request.text.trim();
+    const mode = request.mode;
+    const lang = request.lang;
+
+    if (!text) {
+        port.postMessage({ done: true });
         return;
     }
 
+    // INTERCEPTOR DE CACHÉ
+    const cachedResponse = await getCache(text, mode, lang);
+
+    if (cachedResponse) {
+        // Si está en caché, lo enviamos entero. 
+        // El 'typeWriterEffect' de content.js se encargará de animarlo para que parezca que la IA está escribiendo.
+        port.postMessage({ chunk: 'cached: ' + cachedResponse });
+        port.postMessage({ done: true });
+        return;
+    }
+
+    // DESVÍO A TRADUCCIÓN GRATUITA
+    if (mode === 'translation') {
+        await callFreeTranslation(text, lang, port, mode);
+        return;
+    }
+
+    // LLAMADA A IAs (Definición)
     chrome.storage.sync.get(['provider', 'geminiKey', 'openaiKey', 'anthropicKey', 'deepseekKey'], async (config) => {
         const provider = config.provider || 'google';
 
         try {
             if (provider === 'openai') {
                 if (!config.openaiKey) return port.postMessage({ errorHtml: getMissingKeyUI() });
-                await callOpenAIStream(request.text, config.openaiKey, port, request.lang);
+                await callOpenAIStream(text, config.openaiKey, port, mode, lang);
             }
             else if (provider === 'gemini') {
                 if (!config.geminiKey) return port.postMessage({ errorHtml: getMissingKeyUI() });
-                await callGeminiStream(request.text, config.geminiKey, port, request.lang);
+                await callGeminiStream(text, config.geminiKey, port, mode, lang);
             }
             else if (provider === 'anthropic') {
                 if (!config.anthropicKey) return port.postMessage({ errorHtml: getMissingKeyUI() });
-                await callAnthropicStream(request.text, config.anthropicKey, port, request.lang);
+                await callAnthropicStream(text, config.anthropicKey, port, mode, lang);
             }
             else if (provider === 'deepseek') {
                 if (!config.deepseekKey) return port.postMessage({ errorHtml: getMissingKeyUI() });
-                await callDeepSeekStream(request.text, config.deepseekKey, port, request.lang);
+                await callDeepSeekStream(text, config.deepseekKey, port, mode, lang);
             }
             else {
                 port.postMessage({ errorHtml: await buildFallbackUI(text) });
@@ -50,10 +100,11 @@ async function handleAIStreamRequest(request, port) {
     });
 }
 
-async function readStream(response, port, extractTextFn) {
+async function readStream(response, port, extractTextFn, text, mode, lang) {
     const reader = response.body.getReader();
     const decoder = new TextDecoder("utf-8");
     let buffer = "";
+    let fullResponseText = ""; // Variable para acumular todo el texto
 
     try {
         while (true) {
@@ -75,6 +126,7 @@ async function readStream(response, port, extractTextFn) {
                         const parsed = JSON.parse(dataStr);
                         const textChunk = extractTextFn(parsed);
                         if (textChunk) {
+                            fullResponseText += textChunk; // Acumulamos para la caché
                             port.postMessage({ chunk: textChunk });
                         }
                     } catch (e) {
@@ -86,6 +138,11 @@ async function readStream(response, port, extractTextFn) {
     } catch (e) {
         port.postMessage({ errorHtml: await buildFallbackUI("Error", hrome.i18n.getMessage("errStream")) });
     } finally {
+        // Al terminar el stream, si obtuvimos respuesta, la GUARDAMOS EN CACHÉ
+        if (fullResponseText.trim().length > 0) {
+            setCache(text, mode, lang, fullResponseText);
+        }
+
         port.postMessage({ done: true });
     }
 }
@@ -102,7 +159,7 @@ function buildDynamicPrompt(lang, text = '') {
 }
 
 // --- TRADUCTOR GRATUITO (MyMemory API) ---
-async function callFreeTranslation(text, targetLang, port) {
+async function callFreeTranslation(text, targetLang, port, mode) {
     // targetLang será 'es' o 'en'. Autodetect averigua el idioma de origen.
     const langPair = `Autodetect|${targetLang}`;
     const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`;
@@ -112,9 +169,11 @@ async function callFreeTranslation(text, targetLang, port) {
         const data = await response.json();
 
         if (data.responseData && data.responseData.translatedText) {
+            const resultText = data.responseData.translatedText;
+            setCache(text, mode, targetLang, resultText); // GUARDAMOS EN CACHÉ
             // Enviamos el texto completo al túnel. 
             // ¡El motor de escritura fluida del content.js se encargará de animarlo!
-            port.postMessage({ chunk: data.responseData.translatedText });
+            port.postMessage({ chunk: resultText });
             port.postMessage({ done: true });
         } else {
             throw new Error("No se pudo traducir el texto.");
@@ -126,7 +185,7 @@ async function callFreeTranslation(text, targetLang, port) {
 }
 
 // Proveedores
-async function callOpenAIStream(text, key, port, lang) {
+async function callOpenAIStream(text, key, port, mode, lang) {
     const prompt = buildDynamicPrompt(lang);
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -138,21 +197,30 @@ async function callOpenAIStream(text, key, port, lang) {
         })
     });
     if (!response.ok) throw new Error(chrome.i18n.getMessage("errOpenAI") || "Llave incorrecta");
-    await readStream(response, port, (parsed) => parsed.choices?.[0]?.delta?.content);
+    await readStream(response, port, (parsed) => parsed.choices?.[0]?.delta?.content, text, mode, lang);
 }
 
-async function callGeminiStream(text, key, port, lang) {
+async function callGeminiStream(text, key, port, mode, lang) {
     const prompt = buildDynamicPrompt(lang, text);
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:streamGenerateContent?alt=sse&key=${key}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse&key=${key}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: `${prompt}"${text}"` }] }] })
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
     });
-    if (!response.ok) throw new Error(chrome.i18n.getMessage("errGemini") || "Llave incorrecta");
-    await readStream(response, port, (parsed) => parsed.candidates?.[0]?.content?.parts?.[0]?.text);
+    if (!response.ok) {
+        // Intentamos leer la explicación exacta que nos da Google
+        let apiErrorMsg = `HTTP Error ${response.status}`;
+        try {
+            const errorData = await response.json();
+            apiErrorMsg = errorData.error?.message || apiErrorMsg;
+        } catch (e) { /* Si no es JSON, nos quedamos con el HTTP status */ }
+
+        throw new Error(`Google API: ${apiErrorMsg}`);
+    }
+    await readStream(response, port, (parsed) => parsed.candidates?.[0]?.content?.parts?.[0]?.text, text, mode, lang);
 }
 
-async function callAnthropicStream(text, key, port, lang) {
+async function callAnthropicStream(text, key, port, mode, lang) {
     const prompt = buildDynamicPrompt(lang);
     const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -171,13 +239,10 @@ async function callAnthropicStream(text, key, port, lang) {
         })
     });
     if (!response.ok) throw new Error(chrome.i18n.getMessage("errAnthropic") || "Llave incorrecta");
-    await readStream(response, port, (parsed) => {
-        if (parsed.type === 'content_block_delta') return parsed.delta?.text;
-        return null;
-    });
+    await readStream(response, port, (parsed) => (parsed.type === 'content_block_delta') ? parsed.delta?.text : null, text, mode, lang);
 }
 
-async function callDeepSeekStream(text, key, port, lang) {
+async function callDeepSeekStream(text, key, port, mode, lang) {
     const prompt = buildDynamicPrompt(lang);
     const response = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
@@ -189,7 +254,7 @@ async function callDeepSeekStream(text, key, port, lang) {
         })
     });
     if (!response.ok) throw new Error(chrome.i18n.getMessage("errDeepSeek") || "Llave incorrecta");
-    await readStream(response, port, (parsed) => parsed.choices?.[0]?.delta?.content);
+    await readStream(response, port, (parsed) => parsed.choices?.[0]?.delta?.content, text, mode, lang);
 }
 
 // Fallbacks

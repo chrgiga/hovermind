@@ -198,9 +198,12 @@ function createPopup(rect, mode, lang) {
     let textBuffer = ""; // Aquí llegan los paquetes grandes de la IA
     let displayedText = ""; // Aquí guardamos lo que ya se ha dibujado en pantalla
     let streamFinished = false; // Bandera para saber cuándo cerrar
+    let hasError = false; // Bandera para frenar el motor
 
     // Motor de escritura fluida
     function typeWriterEffect() {
+        if (hasError) return; // Si hay error, no escribimos
+
         if (textBuffer.length > 0) {
             // 1. Al pintar la primera letra real, borramos el "Cargando..."
             if (displayedText === "") {
@@ -242,6 +245,7 @@ function createPopup(rect, mode, lang) {
     // Escuchamos lo que entra por el túnel y lo metemos al Buffer
     port.onMessage.addListener((response) => {
         if (response.errorHtml) {
+            hasError = true; //Activamos la bandera de error para frenar el motor
             responseContainer.innerHTML = response.errorHtml;
             const optionsBtn = document.getElementById('hovermind-open-options-btn');
             if (optionsBtn) {
