@@ -17,30 +17,73 @@ function handleTextSelection(event) {
 
             let range = window.getSelection().getRangeAt(0);
             let rect = range.getBoundingClientRect();
-
             let btn = document.createElement('div');
             btn.id = 'hovermind-quick-btn';
 
+            // 1. Obtenemos textos i18n
+            const txtModeDef = chrome.i18n.getMessage("modeDef") || "Definición";
+            const txtModeTrans = chrome.i18n.getMessage("modeTrans") || "Traducción";
+            const txtBtnDef = chrome.i18n.getMessage("btnDef") || "Definir";
+            const txtBtnTrans = chrome.i18n.getMessage("btnTrans") || "Traducir";
+
+            // 2. Detectamos el idioma del navegador del usuario (es, en, etc.)
+            const browserLang = chrome.i18n.getUILanguage().startsWith('es') ? 'es' : 'en';
+
+            // 3. Estructura de 2 filas
             btn.innerHTML = `
-                <span id="hovermind-action">✨ HoverMind</span>
-                <span id="hovermind-dismiss" title="Ocultar (Esc)">&times;</span>
+                <div class="hm-row">
+                    <select id="hm-mode-select" class="hm-tool-select" title="Modo">
+                        <option value="definition">${txtModeDef}</option>
+                        <option value="translation">${txtModeTrans}</option>
+                    </select>
+                    <div class="hm-divider"></div>
+                    <select id="hm-lang-select" class="hm-tool-select" title="Idioma">
+                        <option value="es" ${browserLang === 'es' ? 'selected' : ''}>ES</option>
+                        <option value="en" ${browserLang === 'en' ? 'selected' : ''}>EN</option>
+                    </select>
+                    <button id="hm-action-close" class="hm-tool-btn" title="Cerrar">&times;</button>
+                </div>
+                <div class="hm-row">
+                    <button id="hm-action-start" class="hm-btn-main">
+                        <span id="hm-icon-start">✨</span>
+                        <span id="hm-text-start">${txtBtnDef}</span>
+                    </button>
+                </div>
             `;
 
-            // Usamos position fixed
-            btn.style.position = 'fixed';
-            btn.style.zIndex = '2147483647';
             btn.style.top = `${rect.bottom + 8}px`;
             btn.style.left = `${rect.left}px`;
 
-            btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+            // Evitamos que se pierda la selección al hacer clic
+            btn.addEventListener('mousedown', function (e) {
+                if (e.target.tagName !== 'SELECT' && e.target.tagName !== 'OPTION') {
+                    e.preventDefault();
+                }
+            });
 
-            btn.addEventListener('mouseup', function (e) {
-                e.stopPropagation();
-                if (e.target.id === 'hovermind-dismiss') {
-                    btn.remove();
+            // 4. Lógica de cambio dinámico del botón según el modo
+            btn.querySelector('#hm-mode-select').addEventListener('change', (e) => {
+                const icon = document.getElementById('hm-icon-start');
+                const text = document.getElementById('hm-text-start');
+                if (e.target.value === 'translation') {
+                    icon.innerText = '🌐'; // Icono de traducir
+                    text.innerText = txtBtnTrans;
                 } else {
+                    icon.innerText = '✨'; // Icono de definir
+                    text.innerText = txtBtnDef;
+                }
+            });
+
+            // 5. Lógica de clics (Cerrar o Iniciar)
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (e.target.closest('#hm-action-close')) {
                     btn.remove();
-                    createPopup(rect);
+                } else if (e.target.closest('#hm-action-start')) {
+                    let mode = document.getElementById('hm-mode-select').value;
+                    let lang = document.getElementById('hm-lang-select').value;
+                    btn.remove();
+                    createPopup(rect, mode, lang);
                 }
             });
 
@@ -80,7 +123,7 @@ document.addEventListener('scroll', () => {
     }
 }, true);
 
-function createPopup(rect) {
+function createPopup(rect, mode, lang) {
     let existingPopup = document.getElementById('hovermind-popup');
     if (existingPopup) existingPopup.remove();
 
@@ -108,6 +151,7 @@ function createPopup(rect) {
         </div>
         <div class="hovermind-content">
             <p><strong>${txtAnalyzed}</strong> "${currentSelectedText}"</p>
+            <hr />
             <div id="hovermind-ai-response">
                 <p class="hovermind-loading">${txtLoading}</p>
             </div>
@@ -149,7 +193,7 @@ function createPopup(rect) {
     const responseContainer = document.getElementById('hovermind-ai-response');
     const port = chrome.runtime.connect({ name: "hovermind-stream" });
 
-    port.postMessage({ action: "analyzeText", text: currentSelectedText });
+    port.postMessage({ action: "analyzeText", text: currentSelectedText, mode: mode, lang: lang });
 
     let textBuffer = ""; // Aquí llegan los paquetes grandes de la IA
     let displayedText = ""; // Aquí guardamos lo que ya se ha dibujado en pantalla

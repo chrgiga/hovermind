@@ -32,12 +32,6 @@
   "saveSuccess": {
     "message": "Settings saved successfully!"
   },
-  "systemPrompt": {
-    "message": "You are a browser-integrated assistant. Your task is to analyze the selected text. STRICT RULE: You must ALWAYS respond in English, regardless of the original text's language. Follow these steps:\n1. Provide a clear and concise explanation of the text's context or meaning.\n2. ONLY if the original text is NOT in English, include an English translation. If it is already in English, skip the translation and do not mention translations."
-  },
-  "systemPromptGemini": {
-    "message": "You are a browser-integrated assistant. Your task is to analyze the selected text. STRICT RULE: You must ALWAYS respond in English, regardless of the original text's language. Follow these steps:\n1. Provide a clear and concise explanation of the text's context or meaning.\n2. ONLY if the original text is NOT in English, include an English translation. If it is already in English, skip the translation and do not mention translations.\n\nSelected text: "
-  },
   "unexError": {
     "message": "❌ Unexpected error: "
   },
@@ -58,5 +52,20 @@
   },
   "errDeepSeek": {
     "message": "Incorrect DeepSeek key"
+  },
+  "errStream": {
+    "message": "The streaming connection was interrupted."
+  },
+  "modeDef": {
+    "message": "Definition"
+  },
+  "modeTrans": {
+    "message": "Translation"
+  },
+  "btnDef": {
+    "message": "Define"
+  },
+  "btnTrans": {
+    "message": "Translate"
   }
 }

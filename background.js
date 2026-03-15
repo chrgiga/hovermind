@@ -2,7 +2,7 @@ chrome.runtime.onConnect.addListener((port) => {
     if (port.name === "hovermind-stream") {
         port.onMessage.addListener((request) => {
             if (request.action === "analyzeText") {
-                handleAIStreamRequest(request.text, port);
+                handleAIStreamRequest(request, port);
             }
         });
     }
@@ -15,26 +15,26 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 });
 
-async function handleAIStreamRequest(text, port) {
+async function handleAIStreamRequest(request, port) {
     chrome.storage.sync.get(['provider', 'geminiKey', 'openaiKey', 'anthropicKey', 'deepseekKey'], async (config) => {
         const provider = config.provider || 'google';
 
         try {
             if (provider === 'openai') {
                 if (!config.openaiKey) return port.postMessage({ errorHtml: getMissingKeyUI() });
-                await callOpenAIStream(text, config.openaiKey, port);
+                await callOpenAIStream(request.text, config.openaiKey, port, request.mode, request.lang);
             }
             else if (provider === 'gemini') {
                 if (!config.geminiKey) return port.postMessage({ errorHtml: getMissingKeyUI() });
-                await callGeminiStream(text, config.geminiKey, port);
+                await callGeminiStream(request.text, config.geminiKey, port, request.mode, request.lang);
             }
             else if (provider === 'anthropic') {
                 if (!config.anthropicKey) return port.postMessage({ errorHtml: getMissingKeyUI() });
-                await callAnthropicStream(text, config.anthropicKey, port);
+                await callAnthropicStream(request.text, config.anthropicKey, port, request.mode, request.lang);
             }
             else if (provider === 'deepseek') {
                 if (!config.deepseekKey) return port.postMessage({ errorHtml: getMissingKeyUI() });
-                await callDeepSeekStream(text, config.deepseekKey, port);
+                await callDeepSeekStream(request.text, config.deepseekKey, port, request.mode, request.lang);
             }
             else {
                 port.postMessage({ errorHtml: await buildFallbackUI(text) });
@@ -61,6 +61,7 @@ async function readStream(response, port, extractTextFn) {
 
             for (let line of lines) {
                 line = line.trim();
+
                 if (line.startsWith('data:')) {
                     const dataStr = line.slice(5).trim();
                     if (dataStr === '[DONE]' || dataStr === '') continue;
@@ -78,15 +79,32 @@ async function readStream(response, port, extractTextFn) {
             }
         }
     } catch (e) {
-        port.postMessage({ errorHtml: await buildFallbackUI("Error", "La conexión de streaming se interrumpió.") });
+        port.postMessage({ errorHtml: await buildFallbackUI("Error", hrome.i18n.getMessage("errStream")) });
     } finally {
         port.postMessage({ done: true });
     }
 }
 
+// --- GENERADOR DINÁMICO DE PROMPTS ---
+function buildDynamicPrompt(mode, lang, text = '') {
+    let prompt = "";
+
+    if (mode === 'translation') {
+        prompt = lang == 'es' ? "Eres un traductor experto y profesional. Tu tarea es traducir el texto indicado directamente al español. REGLA ESTRICTA: Devuelve ÚNICAMENTE la traducción, sin añadir explicaciones, notas ni comillas adicionales." : "You are an expert and professional translator. Your task is to translate the indicated text directly into english. STRICT RULE: Return ONLY the translation, without adding explanations, notes, or additional quotation marks.";
+    } else {
+        prompt = lang == 'es' ? "Eres un asistente experto. Tu tarea es analizar el texto indicado. REGLA ESTRICTA: Debes responder SIEMPRE en español, sin importar en qué idioma esté el texto original. Explica de forma clara y concisa el contexto o significado del texto." : "You are an expert assistant. Your task is to analyze the indicated text. STRICT RULE: You must ALWAYS answer in english, regardless of the original language. Clearly and concisely explain the context or meaning of the text.";
+    }
+
+    if (text.length > 0) {
+        prompt += "\n\n" + (lang == 'es' ? "Texto indicado" : "Indicated text") + ": " + text;
+    }
+
+    return prompt;
+}
+
 // Proveedores
-async function callOpenAIStream(text, key, port) {
-    const prompt = chrome.i18n.getMessage("systemPrompt") || "Eres un asistente útil.";
+async function callOpenAIStream(text, key, port, mode, lang) {
+    const prompt = buildDynamicPrompt(mode, lang);
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
@@ -100,19 +118,19 @@ async function callOpenAIStream(text, key, port) {
     await readStream(response, port, (parsed) => parsed.choices?.[0]?.delta?.content);
 }
 
-async function callGeminiStream(text, key, port) {
-    const promptGemini = chrome.i18n.getMessage("systemPromptGemini") || "Texto: ";
+async function callGeminiStream(text, key, port, mode, lang) {
+    const prompt = buildDynamicPrompt(mode, lang, text);
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:streamGenerateContent?alt=sse&key=${key}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: `${promptGemini}"${text}"` }] }] })
+        body: JSON.stringify({ contents: [{ parts: [{ text: `${prompt}"${text}"` }] }] })
     });
     if (!response.ok) throw new Error(chrome.i18n.getMessage("errGemini") || "Llave incorrecta");
     await readStream(response, port, (parsed) => parsed.candidates?.[0]?.content?.parts?.[0]?.text);
 }
 
-async function callAnthropicStream(text, key, port) {
-    const prompt = chrome.i18n.getMessage("systemPrompt") || "Eres un asistente útil.";
+async function callAnthropicStream(text, key, port, mode, lang) {
+    const prompt = buildDynamicPrompt(mode, lang);
     const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -136,8 +154,8 @@ async function callAnthropicStream(text, key, port) {
     });
 }
 
-async function callDeepSeekStream(text, key, port) {
-    const prompt = chrome.i18n.getMessage("systemPrompt") || "Eres un asistente útil.";
+async function callDeepSeekStream(text, key, port, mode, lang) {
+    const prompt = buildDynamicPrompt(mode, lang);
     const response = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },

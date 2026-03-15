@@ -32,12 +32,6 @@
   "saveSuccess": {
     "message": "¡Configuración guardada con éxito!"
   },
-  "systemPrompt": {
-    "message": "Eres un asistente integrado en el navegador. Tu tarea es analizar el texto seleccionado. REGLA ESTRICTA: Debes responder SIEMPRE en Español, sin importar en qué idioma esté el texto original. Sigue estos pasos:\n1. Explica de forma clara y concisa el contexto o significado del texto.\n2. SOLO si el texto original NO está en Español, incluye una traducción al Español. Si ya está en Español, omite la traducción y no indiques nada a cerca de las traducciones."
-  },
-  "systemPromptGemini": {
-    "message": "Eres un asistente integrado en el navegador. Tu tarea es analizar el texto seleccionado. REGLA ESTRICTA: Debes responder SIEMPRE en Español, sin importar en qué idioma esté el texto original. Sigue estos pasos:\n1. Explica de forma clara y concisa el contexto o significado del texto.\n2. SOLO si el texto original NO está en Español, incluye una traducción al Español. Si ya está en Español, omite la traducción y no indiques nada a cerca de las traducciones.\n\nTexto seleccionado: "
-  },
   "unexError": {
     "message": "❌ Error inesperado: "
   },
@@ -58,5 +52,20 @@
   },
   "errDeepSeek": {
     "message": "Llave de DeepSeek incorrecta"
+  },
+  "errStream": {
+    "message": "La conexión de streaming se interrumpió."
+  },
+  "modeDef": {
+    "message": "Definición"
+  },
+  "modeTrans": {
+    "message": "Traducción"
+  },
+  "btnDef": {
+    "message": "Definir"
+  },
+  "btnTrans": {
+    "message": "Traducir"
   }
 }

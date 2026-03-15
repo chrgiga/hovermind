@@ -1,29 +1,76 @@
 /* =========================================
-   1. ESTILOS DEL BOTÓN RÁPIDO (QUICK BUTTON)
+   1. BARRA DE HERRAMIENTAS FLOTANTE
    ========================================= */
 #hovermind-quick-btn {
     position: fixed !important;
     z-index: 2147483647;
-    background-color: #4f46e5;
-    color: white;
-    border: none;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
     border-radius: 8px;
-    padding: 6px 12px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: all 0.2s ease;
-
-    /* Flexbox para alinear el texto y la X */
     display: flex;
-    align-items: center;
-    gap: 8px;
+    flex-direction: column;
+    /* Cambiado a columna para soportar filas */
+    padding: 6px;
+    gap: 6px;
+    font-family: system-ui, -apple-system, sans-serif;
+    min-width: 180px;
 }
 
-#hovermind-quick-btn:hover {
-    background-color: #4338ca;
+/* Filas internas */
+.hm-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+}
+
+/* Controles superiores */
+.hm-tool-btn,
+.hm-tool-select {
+    background: transparent;
+    border: none;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    outline: none;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.hm-tool-btn:hover,
+.hm-tool-select:hover {
+    background: #f3f4f6;
+}
+
+.hm-divider {
+    width: 1px;
+    height: 16px;
+    background: #d1d5db;
+}
+
+/* Botón Principal de Acción (Fila Inferior) */
+.hm-btn-main {
+    width: 100%;
+    background: #4f46e5;
+    /* Color azul/índigo vibrante */
+    color: white;
+    border: none;
+    padding: 6px 0;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.2s;
+}
+
+.hm-btn-main:hover {
+    background: #4338ca;
 }
 
 /* Evitamos que el texto interfiera con el clic del botón principal */
