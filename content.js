@@ -1,8 +1,6 @@
 let currentSelectedText = "";
 
-// 1. EMPAQUETAMOS LA LÓGICA EN UNA FUNCIÓN REUTILIZABLE
 function handleTextSelection(event) {
-    // Evitamos actuar si el clic o la tecla se originó dentro de nuestro popup o botón
     if (event && event.target && (event.target.closest('#hovermind-quick-btn') || event.target.closest('#hovermind-popup'))) {
         return;
     }
@@ -11,13 +9,8 @@ function handleTextSelection(event) {
         let selectedText = window.getSelection().toString().trim();
         let existingBtn = document.getElementById('hovermind-quick-btn');
 
-        // Si hay texto seleccionado...
         if (selectedText.length > 0) {
-            // Si el texto es exactamente el mismo y el botón ya existe (ej. al pulsar Ctrl+C), 
-            // no hacemos nada para evitar que el botón parpadee.
-            if (existingBtn && currentSelectedText === selectedText) {
-                return;
-            }
+            if (existingBtn && currentSelectedText === selectedText) return;
 
             if (existingBtn) existingBtn.remove();
             currentSelectedText = selectedText;
@@ -33,12 +26,13 @@ function handleTextSelection(event) {
                 <span id="hovermind-dismiss" title="Ocultar (Esc)">&times;</span>
             `;
 
+            // Usamos position fixed
+            btn.style.position = 'fixed';
+            btn.style.zIndex = '2147483647';
             btn.style.top = `${rect.bottom + 8}px`;
             btn.style.left = `${rect.left}px`;
 
-            btn.addEventListener('mousedown', function (e) {
-                e.preventDefault();
-            });
+            btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
 
             btn.addEventListener('mouseup', function (e) {
                 e.stopPropagation();
@@ -52,24 +46,18 @@ function handleTextSelection(event) {
 
             document.body.appendChild(btn);
         } else {
-            // Si el usuario deseleccionó el texto usando el teclado, ocultamos el botón
             if (existingBtn) existingBtn.remove();
             currentSelectedText = "";
         }
     }, 10);
 }
 
-// 2. ESCUCHAMOS LOS EVENTOS DEL RATÓN Y DEL TECLADO
-// Cuando suelta el ratón
 document.addEventListener('mouseup', handleTextSelection);
-
-// Cuando suelta una tecla (Cubre Ctrl+A, Shift+Flechas, Ctrl+Alt, etc.)
 document.addEventListener('keyup', function (event) {
-    if (event.key === 'Escape') return; // La tecla Escape la manejamos abajo
+    if (event.key === 'Escape') return;
     handleTextSelection(event);
 });
 
-// 3. Escape, clics fuera y creación del popup
 document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {
         let btn = document.getElementById('hovermind-quick-btn');
@@ -79,6 +67,19 @@ document.addEventListener('keydown', function (event) {
     }
 });
 
+// Rastreador de scroll para el botón
+document.addEventListener('scroll', () => {
+    let btn = document.getElementById('hovermind-quick-btn');
+    if (btn) {
+        let selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+            let rect = selection.getRangeAt(0).getBoundingClientRect();
+            btn.style.top = `${rect.bottom + 8}px`;
+            btn.style.left = `${rect.left}px`;
+        }
+    }
+}, true);
+
 function createPopup(rect) {
     let existingPopup = document.getElementById('hovermind-popup');
     if (existingPopup) existingPopup.remove();
@@ -86,20 +87,19 @@ function createPopup(rect) {
     let popup = document.createElement('div');
     popup.id = 'hovermind-popup';
 
-    // Si el texto está muy abajo en la pantalla, abrimos el popup HACIA ARRIBA
-    // para que no se corte con el final de la página (el "footer" de la ventana)
-    let topPosition = rect.bottom + window.scrollY + 12;
+    let topPosition = rect.bottom + 12;
     if (rect.bottom + 350 > window.innerHeight) {
-        topPosition = rect.top + window.scrollY - 360; // Lo subimos
-        if (topPosition < 0) topPosition = 20; // Si aún así se sale por arriba, lo pegamos al techo
+        topPosition = rect.top - 360;
+        if (topPosition < 0) topPosition = 20;
     }
 
+    popup.style.position = 'fixed';
+    popup.style.zIndex = '2147483647';
     popup.style.top = `${topPosition}px`;
     popup.style.left = `${rect.left}px`;
 
-    // Obtenemos los textos en el idioma del usuario (i18n)
     const txtAnalyzed = chrome.i18n.getMessage("analyzedText") || "Texto analizado:";
-    const txtLoading = chrome.i18n.getMessage("loading") || "Cargando respuesta de la IA...";
+    const txtLoading = chrome.i18n.getMessage("loading") || "Conectando con la IA...";
 
     popup.innerHTML = `
         <div class="hovermind-header" id="hovermind-drag-handle">
@@ -116,84 +116,110 @@ function createPopup(rect) {
 
     document.body.appendChild(popup);
 
-    // --- LÓGICA DE ARRASTRE (DRAG & DROP) ---
+    // Lógica de arrastre
     const header = document.getElementById('hovermind-drag-handle');
     let isDragging = false;
     let startX, startY, initialLeft, initialTop;
 
     header.addEventListener('mousedown', (e) => {
-        // Si hace clic en la X de cerrar, no arrastramos
         if (e.target.id === 'hovermind-close-btn') return;
-
         isDragging = true;
         startX = e.clientX;
         startY = e.clientY;
         initialLeft = parseFloat(popup.style.left);
         initialTop = parseFloat(popup.style.top);
-        e.preventDefault(); // Evita comportamientos raros del navegador al arrastrar
+        e.preventDefault();
     });
 
-    // Usamos el document para que no se pierda el arrastre si mueves el ratón muy rápido
     document.addEventListener('mousemove', (e) => {
         if (!isDragging || !document.getElementById('hovermind-popup')) return;
-
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
-
         popup.style.left = `${initialLeft + dx}px`;
         popup.style.top = `${initialTop + dy}px`;
     });
 
-    document.addEventListener('mouseup', () => {
-        isDragging = false;
-    });
-    // ----------------------------------------
+    document.addEventListener('mouseup', () => { isDragging = false; });
 
-    // Botón de cerrar
     document.getElementById('hovermind-close-btn').addEventListener('click', () => {
         popup.remove();
     });
 
-    // Conexión con el Background
+    // --- CONEXIÓN POR STREAMING Y EFECTO MÁQUINA DE ESCRIBIR ---
     const responseContainer = document.getElementById('hovermind-ai-response');
+    const port = chrome.runtime.connect({ name: "hovermind-stream" });
 
-    chrome.runtime.sendMessage({ action: "analyzeText", text: currentSelectedText }, (response) => {
-        if (response && response.result) {
-            responseContainer.innerHTML = response.result;
+    port.postMessage({ action: "analyzeText", text: currentSelectedText });
+
+    let textBuffer = ""; // Aquí llegan los paquetes grandes de la IA
+    let displayedText = ""; // Aquí guardamos lo que ya se ha dibujado en pantalla
+    let streamFinished = false; // Bandera para saber cuándo cerrar
+
+    // Motor de escritura fluida
+    function typeWriterEffect() {
+        if (textBuffer.length > 0) {
+            // 1. Al pintar la primera letra real, borramos el "Cargando..."
+            if (displayedText === "") {
+                responseContainer.innerHTML = "";
+            }
+
+            // 2. Acelerador dinámico: Si el buffer se llena muy rápido, cogemos de 2 en 2 o más 
+            // para que la animación no se quede atascada por detrás del tiempo real.
+            let charsToTake = Math.max(1, Math.floor(textBuffer.length / 15));
+            let nextChars = textBuffer.substring(0, charsToTake);
+            textBuffer = textBuffer.substring(charsToTake);
+
+            displayedText += nextChars;
+
+            // 3. Dibujamos el texto actual + el cursor simulado
+            responseContainer.innerHTML = `<p>${displayedText.replace(/\n/g, '<br>')}<span style="font-weight: bold; animation: blink 1s step-end infinite;">|</span></p>`;
+
+            // 4. Auto-scroll hacia abajo si el texto crece mucho
+            const contentDiv = document.querySelector('.hovermind-content');
+            if (contentDiv) contentDiv.scrollTop = contentDiv.scrollHeight;
+
+            // 5. Llamamos al siguiente frame en 20ms (Velocidad de escritura)
+            setTimeout(typeWriterEffect, 20);
+        } else {
+            if (!streamFinished) {
+                // Si el buffer está vacío pero la IA aún no ha terminado, esperamos pacientemente
+                setTimeout(typeWriterEffect, 50);
+            } else {
+                // Si ya terminó del todo, quitamos el cursor simulado y cerramos el puerto
+                responseContainer.innerHTML = `<p>${displayedText.replace(/\n/g, '<br>')}</p>`;
+                port.disconnect();
+            }
+        }
+    }
+
+    // Arrancamos el motor de animación inmediatamente
+    typeWriterEffect();
+
+    // Escuchamos lo que entra por el túnel y lo metemos al Buffer
+    port.onMessage.addListener((response) => {
+        if (response.errorHtml) {
+            responseContainer.innerHTML = response.errorHtml;
             const optionsBtn = document.getElementById('hovermind-open-options-btn');
             if (optionsBtn) {
                 optionsBtn.addEventListener('click', () => {
                     chrome.runtime.sendMessage({ action: "openOptions" });
                 });
             }
-        } else {
-            responseContainer.innerHTML = `<p style="color: #ef4444;">Error de comunicación con el motor de HoverMind.</p>`;
+            streamFinished = true;
+        }
+        else if (response.chunk) {
+            textBuffer += response.chunk; // Metemos el trozo nuevo a la "sala de espera"
+        }
+        else if (response.done) {
+            streamFinished = true; // Avisamos al motor de escritura de que ya no llegará más texto
         }
     });
 }
 
 document.addEventListener('mousedown', function (event) {
     let btn = document.getElementById('hovermind-quick-btn');
-    let popup = document.getElementById('hovermind-popup');
-
     if (btn && !btn.contains(event.target)) {
         btn.remove();
     }
-    if (popup && !popup.contains(event.target)) {
-        popup.remove();
-    }
+    // OJO: No cerramos el popup grande al hacer clic fuera para que el usuario pueda copiar texto
 });
-
-// Mantiene el botón pequeño pegado al texto cuando la página se mueve
-document.addEventListener('scroll', () => {
-    let btn = document.getElementById('hovermind-quick-btn');
-    if (btn) {
-        let selection = window.getSelection();
-        if (selection.rangeCount > 0) {
-            let rect = selection.getRangeAt(0).getBoundingClientRect();
-            // Actualizamos la posición en tiempo real
-            btn.style.top = `${rect.bottom + 8}px`;
-            btn.style.left = `${rect.left}px`;
-        }
-    }
-}, true); // El 'true' es vital: obliga a capturar el scroll de CUALQUIER contenedor interno de la web
