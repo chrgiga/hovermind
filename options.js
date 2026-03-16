@@ -15,6 +15,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let customModels = [];
 
+    // --- 0. INTERNACIONALIZACIÓN (i18n) ---
+    document.title = chrome.i18n.getMessage("optTitle") || "Configuración | HoverMind";
+
+    // Traducir textos
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        el.textContent = chrome.i18n.getMessage(el.getAttribute('data-i18n'));
+    });
+    // Traducir placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        el.placeholder = chrome.i18n.getMessage(el.getAttribute('data-i18n-placeholder'));
+    });
+
     // --- 1. CARGA INICIAL ---
     chrome.storage.sync.get(['geminiKey', 'openaiKey', 'anthropicKey', 'deepseekKey', 'customModels'], (result) => {
         // Cargar Keys
@@ -36,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
             anthropicKey: anthropicKeyInput.value.trim(),
             deepseekKey: deepseekKeyInput.value.trim()
         }, () => {
-            statusMessage.textContent = "¡Claves guardadas correctamente!";
+            statusMessage.textContent = chrome.i18n.getMessage("optKeysSuccess") || "¡Claves guardadas correctamente!";
             statusMessage.className = 'success';
             setTimeout(() => { statusMessage.textContent = ''; statusMessage.className = ''; }, 3000);
         });
@@ -116,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     editingModelId = id;
                     const addBtn = document.getElementById('addModelBtn');
-                    addBtn.textContent = 'Actualizar';
+                    addBtn.textContent = chrome.i18n.getMessage("btnUpdate") || 'Actualizar';
                     addBtn.style.backgroundColor = '#f59e0b';
 
                     // Mostramos el botón de cancelar
@@ -130,9 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', (e) => {
                 const targetId = e.currentTarget.dataset.id;
                 const modelToDelete = customModels.find(m => m.id === targetId);
+                const msgConfirm = chrome.i18n.getMessage("confirmDelete") || "¿Estás seguro de que deseas borrar el modelo";
 
                 // Pedimos confirmación al usuario
-                if (confirm(`¿Estás seguro de que deseas borrar el modelo "${modelToDelete.name}"?`)) {
+                if (confirm(`${msgConfirm} "${modelToDelete.name}"?`)) {
                     customModels = customModels.filter(m => m.id !== targetId);
                     saveModels();
 
@@ -156,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('newModelId').value = '';
 
         const addBtn = document.getElementById('addModelBtn');
-        addBtn.textContent = 'Añadir';
+        addBtn.textContent = chrome.i18n.getMessage("btnAdd") || 'Añadir';
         addBtn.style.backgroundColor = '#10b981';
 
         document.getElementById('cancelEditBtn').style.display = 'none';
@@ -196,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             saveModels();
         } else {
-            alert("Por favor, rellena el Nombre y el ID del API.");
+            alert(chrome.i18n.getMessage("alertFill") || "Por favor, rellena el Nombre y el ID del API.");
         }
     });
 });

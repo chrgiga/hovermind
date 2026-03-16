@@ -232,12 +232,11 @@
     <div class="container">
         <div>
             <h1>✨ HoverMind</h1>
-            <p style="font-size: 14px; color: #4b5563; margin: 0;">Configura tus proveedores y gestiona los modelos
-                disponibles.</p>
+            <p style="font-size: 14px; color: #4b5563; margin: 0;" data-i18n="optSubheader"></p>
         </div>
 
         <div class="card">
-            <h2>🔑 Claves de Acceso (API Keys)</h2>
+            <h2 data-i18n="optKeysTitle"></h2>
             <div class="keys-grid">
                 <div class="form-group">
                     <label>Google Gemini</label>
@@ -256,23 +255,22 @@
                     <input type="password" id="deepseekKey" placeholder="sk-...">
                 </div>
             </div>
-            <button id="saveKeysBtn" class="btn-primary" style="margin-top: 20px;">Guardar Claves</button>
+            <button id="saveKeysBtn" class="btn-primary" style="margin-top: 20px;" data-i18n="optSaveKeysBtn"></button>
             <div id="statusMessage"></div>
         </div>
 
         <div class="card">
-            <h2>🧠 Gestor de Modelos (BYOM)</h2>
-            <p style="font-size: 13px; color: #6b7280; margin-top: 0;">Estos son los modelos que aparecerán en la barra
-                flotante al seleccionar un texto.</p>
+            <h2 data-i18n="optMgrTitle"></h2>
+            <p style="font-size: 13px; color: #6b7280; margin-top: 0;" data-i18n="optMgrDesc"></p>
 
             <table>
                 <thead>
                     <tr>
                         <th style="width: 30px;"></th>
-                        <th>Nombre Visible</th>
-                        <th>Proveedor</th>
-                        <th>ID de la API</th>
-                        <th style="width: 120px;">Acciones</th>
+                        <th data-i18n="tblName"></th>
+                        <th data-i18n="tblProvider"></th>
+                        <th data-i18n="tblApiId"></th>
+                        <th style="width: 120px;" data-i18n="tblActions"></th>
                     </tr>
                 </thead>
                 <tbody id="modelsList">
@@ -280,7 +278,7 @@
                 <tfoot>
                     <tr class="row-add">
                         <td></td>
-                        <td><input type="text" id="newModelName" placeholder="Ej. GPT-4 Rápido"></td>
+                        <td><input type="text" id="newModelName" data-i18n-placeholder="phName"></td>
                         <td>
                             <select id="newModelProvider">
                                 <option value="gemini">Gemini</option>
@@ -289,10 +287,10 @@
                                 <option value="deepseek">DeepSeek</option>
                             </select>
                         </td>
-                        <td><input type="text" id="newModelId" placeholder="Ej. gpt-4o-mini"></td>
+                        <td><input type="text" id="newModelId" data-i18n-placeholder="phApiId"></td>
                         <td>
-                            <button id="addModelBtn" class="btn-add">Añadir</button>
-                            <button id="cancelEditBtn" class="btn-cancel">Cancelar</button>
+                            <button id="addModelBtn" class="btn-add" data-i18n="btnAdd"></button>
+                            <button id="cancelEditBtn" class="btn-cancel" data-i18n="btnCancel"></button>
                         </td>
                     </tr>
                 </tfoot>

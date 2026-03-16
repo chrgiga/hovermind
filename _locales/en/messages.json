@@ -67,5 +67,59 @@
   },
   "btnTrans": {
     "message": "Translate"
+  },
+  "optTitle": {
+    "message": "Settings | HoverMind"
+  },
+  "optSubheader": {
+    "message": "Configure your providers and manage available AI models."
+  },
+  "optKeysTitle": {
+    "message": "🔑 Access Keys (API Keys)"
+  },
+  "optSaveKeysBtn": {
+    "message": "Save Keys"
+  },
+  "optKeysSuccess": {
+    "message": "Keys saved successfully!"
+  },
+  "optMgrTitle": {
+    "message": "🧠 Model Manager (BYOM)"
+  },
+  "optMgrDesc": {
+    "message": "These models will appear in the floating toolbar when selecting text."
+  },
+  "tblName": {
+    "message": "Display Name"
+  },
+  "tblProvider": {
+    "message": "Provider"
+  },
+  "tblApiId": {
+    "message": "API ID"
+  },
+  "tblActions": {
+    "message": "Actions"
+  },
+  "phName": {
+    "message": "E.g. Fast GPT-4"
+  },
+  "phApiId": {
+    "message": "E.g. gpt-4o-mini"
+  },
+  "btnAdd": {
+    "message": "Add"
+  },
+  "btnUpdate": {
+    "message": "Update"
+  },
+  "btnCancel": {
+    "message": "Cancel"
+  },
+  "confirmDelete": {
+    "message": "Are you sure you want to delete the model"
+  },
+  "alertFill": {
+    "message": "Please fill in the Name and API ID."
   }
 }

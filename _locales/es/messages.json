@@ -67,5 +67,59 @@
   },
   "btnTrans": {
     "message": "Traducir"
+  },
+  "optTitle": {
+    "message": "Configuración | HoverMind"
+  },
+  "optSubheader": {
+    "message": "Configura tus proveedores y gestiona los modelos disponibles."
+  },
+  "optKeysTitle": {
+    "message": "🔑 Claves de Acceso (API Keys)"
+  },
+  "optSaveKeysBtn": {
+    "message": "Guardar Claves"
+  },
+  "optKeysSuccess": {
+    "message": "¡Claves guardadas correctamente!"
+  },
+  "optMgrTitle": {
+    "message": "🧠 Gestor de Modelos (BYOM)"
+  },
+  "optMgrDesc": {
+    "message": "Estos son los modelos que aparecerán en la barra flotante al seleccionar un texto."
+  },
+  "tblName": {
+    "message": "Nombre Visible"
+  },
+  "tblProvider": {
+    "message": "Proveedor"
+  },
+  "tblApiId": {
+    "message": "ID de la API"
+  },
+  "tblActions": {
+    "message": "Acciones"
+  },
+  "phName": {
+    "message": "Ej. GPT-4 Rápido"
+  },
+  "phApiId": {
+    "message": "Ej. gpt-4o-mini"
+  },
+  "btnAdd": {
+    "message": "Añadir"
+  },
+  "btnUpdate": {
+    "message": "Actualizar"
+  },
+  "btnCancel": {
+    "message": "Cancelar"
+  },
+  "confirmDelete": {
+    "message": "¿Estás seguro de que deseas borrar el modelo"
+  },
+  "alertFill": {
+    "message": "Por favor, rellena el Nombre y el ID del API."
   }
 }
