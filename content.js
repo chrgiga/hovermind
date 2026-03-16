@@ -1,4 +1,17 @@
 let currentSelectedText = "";
+let currentModels = [];
+
+chrome.storage.sync.get(['customModels'], (res) => {
+    // Si no hay configurados, ponemos los de por defecto
+    currentModels = res.customModels || [
+        { id: "1", name: "Gemini Flash", provider: "gemini", apiModel: "gemini-latest-flash" },
+        { id: "2", name: "GPT-3.5 Turbo", provider: "openai", apiModel: "gpt-3.5-turbo" }
+    ];
+});
+// Escuchar cambios por si el usuario añade uno nuevo sin recargar la página
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'sync' && changes.customModels) currentModels = changes.customModels.newValue;
+});
 
 function handleTextSelection(event) {
     if (event && event.target && (event.target.closest('#hovermind-quick-btn') || event.target.closest('#hovermind-popup'))) {
@@ -28,10 +41,18 @@ function handleTextSelection(event) {
 
             // 2. Detectamos el idioma del navegador del usuario (es, en, etc.)
             const browserLang = chrome.i18n.getUILanguage().startsWith('es') ? 'es' : 'en';
+            // Generamos las opciones del `<select>` leyendo el Array
+            const modelOptionsHtml = currentModels.map(m =>
+                `<option value="${m.id}">${m.name}</option>`
+            ).join('');
 
             // 3. Estructura de 2 filas
             btn.innerHTML = `
                 <div class="hm-row">
+                    <div class="hm-divider"></div>
+                    <select id="hm-model-select" class="hm-tool-select" title="Modelo IA">
+                        ${modelOptionsHtml}
+                    </select>
                     <select id="hm-mode-select" class="hm-tool-select" title="Modo">
                         <option value="definition">${txtModeDef}</option>
                         <option value="translation">${txtModeTrans}</option>
@@ -82,8 +103,9 @@ function handleTextSelection(event) {
                 } else if (e.target.closest('#hm-action-start')) {
                     let mode = document.getElementById('hm-mode-select').value;
                     let lang = document.getElementById('hm-lang-select').value;
+                    let modelId = document.getElementById('hm-model-select').value;
                     btn.remove();
-                    createPopup(rect, mode, lang);
+                    createPopup(rect, mode, lang, modelId);
                 }
             });
 
@@ -123,7 +145,7 @@ document.addEventListener('scroll', () => {
     }
 }, true);
 
-function createPopup(rect, mode, lang) {
+function createPopup(rect, mode, lang, modelId) {
     let existingPopup = document.getElementById('hovermind-popup');
     if (existingPopup) existingPopup.remove();
 
@@ -193,7 +215,7 @@ function createPopup(rect, mode, lang) {
     const responseContainer = document.getElementById('hovermind-ai-response');
     const port = chrome.runtime.connect({ name: "hovermind-stream" });
 
-    port.postMessage({ action: "analyzeText", text: currentSelectedText, mode: mode, lang: lang });
+    port.postMessage({ action: "analyzeText", text: currentSelectedText, mode: mode, lang: lang, modelId: modelId });
 
     let textBuffer = ""; // Aquí llegan los paquetes grandes de la IA
     let displayedText = ""; // Aquí guardamos lo que ya se ha dibujado en pantalla

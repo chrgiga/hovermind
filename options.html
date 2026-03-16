@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuración de HoverMind</title>
+    <title>Configuración | HoverMind</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -17,12 +17,18 @@
         }
 
         .container {
-            background-color: #ffffff;
-            padding: 32px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             width: 100%;
-            max-width: 450px;
+            max-width: 700px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .card {
+            background-color: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
@@ -34,73 +40,189 @@
             gap: 10px;
         }
 
-        .form-group {
+        h2 {
+            margin-top: 0;
+            font-size: 18px;
+            color: #374151;
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 10px;
             margin-bottom: 20px;
         }
 
-        label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 14px;
+        .keys-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
         }
 
-        select,
-        input[type="password"] {
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        input[type="password"],
+        input[type="text"],
+        select {
             width: 100%;
             padding: 10px;
             border: 1px solid #d1d5db;
             border-radius: 6px;
             box-sizing: border-box;
-            font-family: inherit;
-            font-size: 14px;
+            font-size: 13px;
         }
 
-        select:focus,
-        input[type="password"]:focus {
+        input:focus,
+        select:focus {
             outline: none;
             border-color: #4f46e5;
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
 
-        .help-text {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 4px;
-        }
-
-        button {
+        table {
             width: 100%;
-            background-color: #4f46e5;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
+            border-collapse: collapse;
             margin-top: 10px;
         }
 
-        button:hover {
+        th {
+            text-align: left;
+            background: #f9fafb;
+            padding: 10px;
+            font-size: 13px;
+            color: #6b7280;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        .row-add {
+            background: #f8fafc;
+        }
+
+        .btn-primary {
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
             background-color: #4338ca;
         }
 
+        .btn-add {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        .btn-add:hover {
+            background-color: #059669;
+        }
+
+        /* --- NUEVOS ESTILOS DE BOTONES E ICONOS --- */
+        .action-cell {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .btn-edit {
+            color: #f59e0b;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 2px;
+            transition: transform 0.1s;
+        }
+
+        .btn-edit:hover {
+            transform: scale(1.2);
+        }
+
+        .btn-delete {
+            color: #ef4444;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 2px;
+            transition: transform 0.1s;
+        }
+
+        .btn-delete:hover {
+            transform: scale(1.2);
+        }
+
+        .btn-cancel {
+            background-color: #6b7280;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .btn-cancel:hover {
+            background-color: #4b5563;
+        }
+
         #statusMessage {
-            margin-top: 15px;
             text-align: center;
             font-size: 14px;
             font-weight: 600;
             min-height: 20px;
+            margin-top: 10px;
         }
 
         .success {
             color: #10b981;
         }
 
-        .error {
-            color: #ef4444;
+        /* Drag & Drop */
+        .drag-handle {
+            cursor: grab;
+            color: #9ca3af;
+            font-size: 16px;
+            text-align: center;
+            user-select: none;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .dragging {
+            opacity: 0.5;
+            background-color: #f9fafb;
+        }
+
+        .drag-over {
+            border-top: 2px dashed #4f46e5;
         }
     </style>
 </head>
@@ -108,46 +230,74 @@
 <body>
 
     <div class="container">
-        <h1>✨ HoverMind</h1>
-        <p style="font-size: 14px; color: #4b5563; margin-bottom: 24px;">Configura tus proveedores de IA para analizar textos.</p>
-
-        <div class="form-group">
-            <label for="provider">Proveedor de IA principal:</label>
-            <select id="provider">
-                <option value="google">Búsqueda de Google y Wikipedia (Gratis)</option>
-                <option value="gemini">Google Gemini API</option>
-                <option value="openai">OpenAI (ChatGPT) API</option>
-                <option value="anthropic">Anthropic (Claude) API</option>
-                <option value="deepseek">DeepSeek API</option>
-            </select>
+        <div>
+            <h1>✨ HoverMind</h1>
+            <p style="font-size: 14px; color: #4b5563; margin: 0;">Configura tus proveedores y gestiona los modelos
+                disponibles.</p>
         </div>
 
-        <div id="geminiGroup" class="form-group" style="display: none;">
-            <label for="geminiKey">API Key de Gemini:</label>
-            <input type="password" id="geminiKey" placeholder="AIzaSy...">
-            <div class="help-text">Obtén tu clave en Google AI Studio.</div>
+        <div class="card">
+            <h2>🔑 Claves de Acceso (API Keys)</h2>
+            <div class="keys-grid">
+                <div class="form-group">
+                    <label>Google Gemini</label>
+                    <input type="password" id="geminiKey" placeholder="AIzaSy...">
+                </div>
+                <div class="form-group">
+                    <label>OpenAI (ChatGPT)</label>
+                    <input type="password" id="openaiKey" placeholder="sk-...">
+                </div>
+                <div class="form-group">
+                    <label>Anthropic (Claude)</label>
+                    <input type="password" id="anthropicKey" placeholder="sk-ant-...">
+                </div>
+                <div class="form-group">
+                    <label>DeepSeek</label>
+                    <input type="password" id="deepseekKey" placeholder="sk-...">
+                </div>
+            </div>
+            <button id="saveKeysBtn" class="btn-primary" style="margin-top: 20px;">Guardar Claves</button>
+            <div id="statusMessage"></div>
         </div>
 
-        <div id="openaiGroup" class="form-group" style="display: none;">
-            <label for="openaiKey">API Key de OpenAI:</label>
-            <input type="password" id="openaiKey" placeholder="sk-...">
-            <div class="help-text">Obtén tu clave en la plataforma de OpenAI.</div>
-        </div>
+        <div class="card">
+            <h2>🧠 Gestor de Modelos (BYOM)</h2>
+            <p style="font-size: 13px; color: #6b7280; margin-top: 0;">Estos son los modelos que aparecerán en la barra
+                flotante al seleccionar un texto.</p>
 
-        <div id="anthropicGroup" class="form-group" style="display: none;">
-            <label for="anthropicKey">API Key de Anthropic (Claude):</label>
-            <input type="password" id="anthropicKey" placeholder="sk-ant-...">
-            <div class="help-text">Obtén tu clave en la consola de Anthropic.</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 30px;"></th>
+                        <th>Nombre Visible</th>
+                        <th>Proveedor</th>
+                        <th>ID de la API</th>
+                        <th style="width: 120px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="modelsList">
+                </tbody>
+                <tfoot>
+                    <tr class="row-add">
+                        <td></td>
+                        <td><input type="text" id="newModelName" placeholder="Ej. GPT-4 Rápido"></td>
+                        <td>
+                            <select id="newModelProvider">
+                                <option value="gemini">Gemini</option>
+                                <option value="openai">OpenAI</option>
+                                <option value="anthropic">Anthropic</option>
+                                <option value="deepseek">DeepSeek</option>
+                            </select>
+                        </td>
+                        <td><input type="text" id="newModelId" placeholder="Ej. gpt-4o-mini"></td>
+                        <td>
+                            <button id="addModelBtn" class="btn-add">Añadir</button>
+                            <button id="cancelEditBtn" class="btn-cancel">Cancelar</button>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
-
-        <div id="deepseekGroup" class="form-group" style="display: none;">
-            <label for="deepseekKey">API Key de DeepSeek:</label>
-            <input type="password" id="deepseekKey" placeholder="sk-...">
-            <div class="help-text">Obtén tu clave en la plataforma de DeepSeek.</div>
-        </div>
-
-        <button id="saveBtn">Guardar Configuración</button>
-        <div id="statusMessage"></div>
     </div>
 
     <script src="options.js"></script>
