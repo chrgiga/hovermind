@@ -59,7 +59,7 @@ async function handleAIStreamRequest(request, port) {
     if (cachedResponse) {
         // Si está en caché, lo enviamos entero. 
         // El 'typeWriterEffect' de content.js se encargará de animarlo para que parezca que la IA está escribiendo.
-        port.postMessage({ chunk: 'cached: ' + cachedResponse });
+        port.postMessage({ chunk: cachedResponse });
         port.postMessage({ done: true });
         return;
     }
