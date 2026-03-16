@@ -46,8 +46,9 @@ function handleTextSelection(event) {
                 `<option value="${m.id}">${m.name}</option>`
             ).join('');
 
-            // 3. Estructura de 2 filas
+            // 3. Estructura con X flotante y botón de configuración
             btn.innerHTML = `
+                <button id="hm-action-close" class="hm-floating-close" title="Cerrar">&times;</button>
                 <div class="hm-row">
                     <div class="hm-divider"></div>
                     <select id="hm-model-select" class="hm-tool-select" title="Modelo IA">
@@ -62,7 +63,7 @@ function handleTextSelection(event) {
                         <option value="es" ${browserLang === 'es' ? 'selected' : ''}>ES</option>
                         <option value="en" ${browserLang === 'en' ? 'selected' : ''}>EN</option>
                     </select>
-                    <button id="hm-action-close" class="hm-tool-btn" title="Cerrar">&times;</button>
+                    <button id="hm-action-settings" class="hm-tool-btn" title="Configuración">⚙️</button>
                 </div>
                 <div class="hm-row">
                     <button id="hm-action-start" class="hm-btn-main">
@@ -95,10 +96,13 @@ function handleTextSelection(event) {
                 }
             });
 
-            // 5. Lógica de clics (Cerrar o Iniciar)
+            // 5. Lógica de clics (Cerrar, Iniciar o Ajustes)
             btn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 if (e.target.closest('#hm-action-close')) {
+                    btn.remove();
+                } else if (e.target.closest('#hm-action-settings')) {
+                    chrome.runtime.sendMessage({ action: "openOptions" });
                     btn.remove();
                 } else if (e.target.closest('#hm-action-start')) {
                     let mode = document.getElementById('hm-mode-select').value;

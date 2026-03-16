@@ -212,4 +212,94 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(chrome.i18n.getMessage("alertFill") || "Por favor, rellena el Nombre y el ID del API.");
         }
     });
+
+    // --- 4. GESTOR DE CACHÉ ---
+    const cacheList = document.getElementById('cacheList');
+    const clearAllCacheBtn = document.getElementById('clearAllCacheBtn');
+
+    function renderCache() {
+        // La caché está en storage.local, no en storage.sync
+        chrome.storage.local.get(['hovermind_cache'], (res) => {
+            cacheList.innerHTML = '';
+            const cache = res.hovermind_cache || {};
+            const keys = Object.keys(cache);
+
+            if (keys.length === 0) {
+                cacheList.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #9ca3af; padding: 20px;">La caché está vacía</td></tr>`;
+                return;
+            }
+
+            keys.forEach(key => {
+                // Separamos la clave: mode_lang_model_TEXTO
+                const parts = key.split('_');
+                const textOriginal = parts.slice(3).join('_'); // Reconstruimos el texto por si tenía guiones bajos
+                const respuesta = cache[key];
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td title="${textOriginal}" style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px;">${textOriginal}</td>
+                    <td title="${respuesta}" style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; color: #4b5563;">${respuesta}</td>
+                    <td>
+                        <div class="action-cell" style="justify-content: flex-end;">
+                            <button data-key="${key}" class="btn-view-cache" style="background:none; border:none; cursor:pointer; font-size:16px; transition:transform 0.1s;" title="Ver detalle">👁️</button>
+                            <button data-key="${key}" class="btn-delete-cache" style="color:#ef4444; background:none; border:none; cursor:pointer; font-size:16px; transition:transform 0.1s;" title="Borrar">🗑️</button>
+                        </div>
+                    </td>
+                `;
+                cacheList.appendChild(tr);
+            });
+
+            // Evento para ver en grande (Abrir Modal)
+            document.querySelectorAll('.btn-view-cache').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const keyToView = e.currentTarget.dataset.key;
+                    const parts = keyToView.split('_');
+                    const textOriginal = parts.slice(3).join('_');
+                    const respuesta = cache[keyToView];
+
+                    document.getElementById('modalOriginalText').textContent = textOriginal;
+                    document.getElementById('modalResponseText').textContent = respuesta;
+                    document.getElementById('cacheModal').classList.add('show');
+                });
+            });
+
+            // Evento para borrar una fila individual
+            document.querySelectorAll('.btn-delete-cache').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const keyToDelete = e.currentTarget.dataset.key;
+                    delete cache[keyToDelete];
+                    chrome.storage.local.set({ hovermind_cache: cache }, () => {
+                        renderCache(); // Repintamos la tabla
+                    });
+                });
+            });
+        });
+    }
+
+    // Evento para Vaciar toda la Caché
+    clearAllCacheBtn.addEventListener('click', () => {
+        if (confirm("¿Estás seguro de que deseas eliminar todo el historial de caché?")) {
+            chrome.storage.local.remove(['hovermind_cache'], () => {
+                renderCache();
+            });
+        }
+    });
+
+    // Pintar la caché al abrir las opciones
+    renderCache();
+
+    // --- LÓGICA PARA CERRAR EL MODAL ---
+    const cacheModal = document.getElementById('cacheModal');
+
+    // Cerrar al pulsar la X
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+        cacheModal.classList.remove('show');
+    });
+
+    // Cerrar al hacer clic en el fondo gris oscuro
+    cacheModal.addEventListener('click', (e) => {
+        if (e.target === cacheModal) {
+            cacheModal.classList.remove('show');
+        }
+    });
 });

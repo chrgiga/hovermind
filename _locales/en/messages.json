@@ -121,5 +121,20 @@
   },
   "alertFill": {
     "message": "Please fill in the Name and API ID."
+  },
+  "optCacheTitle": {
+    "message": "🗄️ Response Cache"
+  },
+  "optCacheDesc": {
+    "message": "Manage the history of cached texts to save tokens."
+  },
+  "btnEmptyCache": {
+    "message": "Empty All Cache"
+  },
+  "tblCacheText": {
+    "message": "Original Text"
+  },
+  "tblCacheResponse": {
+    "message": "Saved Response"
   }
 }

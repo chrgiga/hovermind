@@ -121,5 +121,20 @@
   },
   "alertFill": {
     "message": "Por favor, rellena el Nombre y el ID del API."
+  },
+  "optCacheTitle": {
+    "message": "🗄️ Caché de Respuestas"
+  },
+  "optCacheDesc": {
+    "message": "Gestiona el historial de textos cacheados para ahorrar tokens."
+  },
+  "btnEmptyCache": {
+    "message": "Vaciar Toda la Caché"
+  },
+  "tblCacheText": {
+    "message": "Texto Original"
+  },
+  "tblCacheResponse": {
+    "message": "Respuesta Guardada"
   }
 }
