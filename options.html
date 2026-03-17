@@ -325,6 +325,31 @@
         </div>
 
         <div class="card">
+            <h2 data-i18n="optGeneralTitle">⚙️ Ajustes Generales</h2>
+            <div class="keys-grid">
+                <div class="form-group">
+                    <label data-i18n="optDefLang">Idioma por defecto:</label>
+                    <select id="defaultLang">
+                        <option value="es" data-i18n="optLangEs">Español (ES)</option>
+                        <option value="en" data-i18n="optLangEn">Inglés (EN)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="optDefAction">Acción por defecto:</label>
+                    <select id="defaultAction">
+                        <option value="translation" data-i18n="optActionTrans">🌐 Traducir</option>
+                        <option value="definition" data-i18n="optActionDef">✨ Definir (IA)</option>
+                    </select>
+                </div>
+            </div>
+            <button id="saveGeneralBtn" class="btn-primary" style="margin-top: 15px;"
+                data-i18n="optSaveGeneralBtn">Guardar Ajustes Generales</button>
+            <div id="generalStatusMessage"
+                style="text-align: center; font-size: 14px; font-weight: 600; min-height: 20px; margin-top: 10px;">
+            </div>
+        </div>
+
+        <div class="card">
             <h2 data-i18n="optKeysTitle"></h2>
             <div class="keys-grid">
                 <div class="form-group">
@@ -356,6 +381,7 @@
                 <thead>
                     <tr>
                         <th style="width: 30px;"></th>
+                        <th style="width: 80px; text-align: center;" data-i18n="tblDefault"></th>
                         <th data-i18n="tblName"></th>
                         <th data-i18n="tblProvider"></th>
                         <th data-i18n="tblApiId"></th>

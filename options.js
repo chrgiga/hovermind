@@ -7,6 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveKeysBtn = document.getElementById('saveKeysBtn');
     const statusMessage = document.getElementById('statusMessage');
 
+    // --- GESTIÓN DE AJUSTES GENERALES ---
+    const defaultLangSelect = document.getElementById('defaultLang');
+    const defaultActionSelect = document.getElementById('defaultAction');
+
     // Modelos por defecto
     const DEFAULT_MODELS = [
         { id: "1", name: "Gemini Flash", provider: "gemini", apiModel: "gemini-latest-flash" },
@@ -14,6 +18,33 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     let customModels = [];
+    let currentDefaultModelId = null;
+
+    chrome.storage.sync.get(['defaultLang', 'defaultAction', 'defaultModelId'], (res) => {
+        if (res.defaultLang) defaultLangSelect.value = res.defaultLang;
+        if (res.defaultAction) defaultActionSelect.value = res.defaultAction;
+        if (res.defaultModelId) currentDefaultModelId = res.defaultModelId;
+    });
+
+    document.getElementById('saveGeneralBtn').addEventListener('click', () => {
+        chrome.storage.sync.set({
+            defaultLang: defaultLangSelect.value,
+            defaultAction: defaultActionSelect.value
+        }, () => {
+            const msg = document.getElementById('generalStatusMessage');
+            msg.textContent = chrome.i18n.getMessage("optGeneralSuccess") || "Ajustes guardados";
+            msg.className = 'success';
+            setTimeout(() => { msg.textContent = ''; }, 3000);
+        });
+    });
+
+    // Delegación de eventos para capturar el cambio del radio button en la tabla
+    document.getElementById('modelsList').addEventListener('change', (e) => {
+        if (e.target.classList.contains('default-model-radio')) {
+            currentDefaultModelId = e.target.value;
+            chrome.storage.sync.set({ defaultModelId: currentDefaultModelId });
+        }
+    });
 
     // --- 0. INTERNACIONALIZACIÓN (i18n) ---
     document.title = chrome.i18n.getMessage("optTitle") || "Configuración | HoverMind";
@@ -76,6 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tr.innerHTML = `
                 <td class="drag-handle" title="Arrastrar para ordenar">☰</td>
+                <td style="text-align: center;">
+                    <input type="radio" name="defaultModel" class="default-model-radio" value="${model.id}">
+                </td>
                 <td><strong>${model.name}</strong></td>
                 <td><span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${providerNames[model.provider]}</span></td>
                 <td><code>${model.apiModel}</code></td>
@@ -154,6 +188,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
+
+        setTimeout(() => {
+            const radios = document.querySelectorAll('.default-model-radio');
+            let found = false;
+            radios.forEach(r => {
+                if (r.value === currentDefaultModelId) { r.checked = true; found = true; }
+            });
+            if (!found && radios.length > 0) {
+                radios[0].checked = true; // Si no hay seleccionado, marca el primero
+                chrome.storage.sync.set({ defaultModelId: radios[0].value });
+            }
+        }, 50);
     }
 
     function saveModels() {

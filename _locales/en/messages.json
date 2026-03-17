@@ -139,5 +139,62 @@
   },
   "tblCacheDate": {
     "message": "Date"
+  },
+  "optGeneralTitle": {
+    "message": "⚙️ General Settings"
+  },
+  "optDefLang": {
+    "message": "Default Language:"
+  },
+  "optLangEs": {
+    "message": "Spanish (ES)"
+  },
+  "optLangEn": {
+    "message": "English (EN)"
+  },
+  "optDefAction": {
+    "message": "Default Action:"
+  },
+  "optActionTrans": {
+    "message": "🌐 Translate"
+  },
+  "optActionDef": {
+    "message": "✨ Define (AI)"
+  },
+  "optSaveGeneralBtn": {
+    "message": "Save General Settings"
+  },
+  "optGeneralSuccess": {
+    "message": "Settings saved!"
+  },
+  "tbTransText": {
+    "message": "🌐 Translate text"
+  },
+  "tbDefModelLabel": {
+    "message": "✨ Define with AI Model:"
+  },
+  "tbLangEs": {
+    "message": "Spanish"
+  },
+  "tbLangEn": {
+    "message": "English"
+  },
+  "tbOpenOptions": {
+    "message": "Open Options Panel ↗"
+  },
+  "tbBtnTrans": {
+    "message": "Translate"
+  },
+  "tbBtnDef": {
+    "message": "Define"
+  },
+  "tbSettingsTooltip": {
+    "message": "Query Settings"
+  },
+  "tbCloseTooltip": {
+    "message": "Close"
+  },
+  "tblDefault": {
+    "message": "Default"
   }
 }

@@ -30,7 +30,6 @@
 
 #hovermind-quick-btn {
     position: fixed !important;
-    overflow: visible !important;
     z-index: 2147483647;
     background: #ffffff;
     border: 1px solid #e5e7eb;
@@ -39,9 +38,32 @@
     display: flex;
     flex-direction: column;
     padding: 6px;
-    gap: 6px;
     font-family: system-ui, -apple-system, sans-serif;
-    min-width: 180px;
+    min-width: 160px;
+}
+
+/* La fila principal siempre visible */
+.hm-minimal-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    width: 100%;
+}
+
+/* El popover de ajustes oculto por defecto */
+.hm-settings-popover {
+    display: none;
+    /* Oculto inicialmente */
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
+    margin-top: 8px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.hm-settings-popover.show {
+    display: flex;
 }
 
 /* Filas internas */

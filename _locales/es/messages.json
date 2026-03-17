@@ -139,5 +139,62 @@
   },
   "tblCacheDate": {
     "message": "Fecha"
+  },
+  "optGeneralTitle": {
+    "message": "⚙️ Ajustes Generales"
+  },
+  "optDefLang": {
+    "message": "Idioma por defecto:"
+  },
+  "optLangEs": {
+    "message": "Español (ES)"
+  },
+  "optLangEn": {
+    "message": "Inglés (EN)"
+  },
+  "optDefAction": {
+    "message": "Acción por defecto:"
+  },
+  "optActionTrans": {
+    "message": "🌐 Traducir"
+  },
+  "optActionDef": {
+    "message": "✨ Definir (IA)"
+  },
+  "optSaveGeneralBtn": {
+    "message": "Guardar Ajustes Generales"
+  },
+  "optGeneralSuccess": {
+    "message": "¡Ajustes guardados!"
+  },
+  "tbTransText": {
+    "message": "🌐 Traducir texto"
+  },
+  "tbDefModelLabel": {
+    "message": "✨ Definir con Modelo IA:"
+  },
+  "tbLangEs": {
+    "message": "Español"
+  },
+  "tbLangEn": {
+    "message": "Inglés"
+  },
+  "tbOpenOptions": {
+    "message": "Abrir Panel de Opciones ↗"
+  },
+  "tbBtnTrans": {
+    "message": "Traducir"
+  },
+  "tbBtnDef": {
+    "message": "Definir"
+  },
+  "tbSettingsTooltip": {
+    "message": "Ajustes de consulta"
+  },
+  "tbCloseTooltip": {
+    "message": "Cerrar"
+  },
+  "tblDefault": {
+    "message": "Por defecto"
   }
 }

@@ -1,17 +1,23 @@
 let currentSelectedText = "";
 let currentModels = [];
 let lastUsedModelId = null;
+let currentDefaultLang = "es";
+let currentDefaultAction = "translation";
+let currentDefaultModelId = null;
 
 chrome.storage.local.get(['lastUsedModelId'], (res) => {
     if (res.lastUsedModelId) lastUsedModelId = res.lastUsedModelId;
 });
 
-chrome.storage.sync.get(['customModels'], (res) => {
+chrome.storage.sync.get(['customModels', 'defaultLang', 'defaultAction', 'defaultModelId'], (res) => {
     // Si no hay configurados, ponemos los de por defecto
     currentModels = res.customModels || [
         { id: "1", name: "Gemini Flash", provider: "gemini", apiModel: "gemini-latest-flash" },
         { id: "2", name: "GPT-3.5 Turbo", provider: "openai", apiModel: "gpt-3.5-turbo" }
     ];
+    currentDefaultLang = res.defaultLang || 'es';
+    currentDefaultAction = res.defaultAction || 'translation';
+    currentDefaultModelId = res.defaultModelId || (currentModels[0] ? currentModels[0].id : null);
 });
 // Escuchar cambios por si el usuario añade uno nuevo sin recargar la página
 chrome.storage.onChanged.addListener((changes, area) => {
@@ -37,88 +43,100 @@ function handleTextSelection(event) {
             let rect = range.getBoundingClientRect();
             let btn = document.createElement('div');
             btn.id = 'hovermind-quick-btn';
-
-            // 1. Obtenemos textos i18n
-            const txtModeDef = chrome.i18n.getMessage("modeDef") || "Definición";
-            const txtModeTrans = chrome.i18n.getMessage("modeTrans") || "Traducción";
-            const txtBtnDef = chrome.i18n.getMessage("btnDef") || "Definir";
-            const txtBtnTrans = chrome.i18n.getMessage("btnTrans") || "Traducir";
-
-            // 2. Detectamos el idioma del navegador del usuario (es, en, etc.)
-            const browserLang = chrome.i18n.getUILanguage().startsWith('es') ? 'es' : 'en';
-            // Generamos las opciones y marcamos el último usado
-            const modelOptionsHtml = currentModels.map(m =>
-                `<option value="${m.id}" ${m.id === lastUsedModelId ? 'selected' : ''}>${m.name}</option>`
-            ).join('');
-
-            // 3. Estructura con X flotante y botón de configuración
-            btn.innerHTML = `
-                <button id="hm-action-close" class="hm-floating-close" title="Cerrar">&times;</button>
-                <div class="hm-row">
-                    <div class="hm-divider"></div>
-                    <select id="hm-model-select" class="hm-tool-select" title="Modelo IA">
-                        ${modelOptionsHtml}
-                    </select>
-                    <select id="hm-mode-select" class="hm-tool-select" title="Modo">
-                        <option value="definition">${txtModeDef}</option>
-                        <option value="translation">${txtModeTrans}</option>
-                    </select>
-                    <div class="hm-divider"></div>
-                    <select id="hm-lang-select" class="hm-tool-select" title="Idioma">
-                        <option value="es" ${browserLang === 'es' ? 'selected' : ''}>ES</option>
-                        <option value="en" ${browserLang === 'en' ? 'selected' : ''}>EN</option>
-                    </select>
-                    <button id="hm-action-settings" class="hm-tool-btn" title="Configuración">⚙️</button>
-                </div>
-                <div class="hm-row">
-                    <button id="hm-action-start" class="hm-btn-main">
-                        <span id="hm-icon-start">✨</span>
-                        <span id="hm-text-start">${txtBtnDef}</span>
-                    </button>
-                </div>
-            `;
-
             btn.style.top = `${rect.bottom + 8}px`;
             btn.style.left = `${rect.left}px`;
 
-            // Evitamos que se pierda la selección al hacer clic
-            btn.addEventListener('mousedown', function (e) {
-                if (e.target.tagName !== 'SELECT' && e.target.tagName !== 'OPTION') {
-                    e.preventDefault();
-                }
-            });
+            // 1. Leer los defaults (debes tenerlos guardados en variables globales arriba, igual que currentModels)
+            let actionType = currentDefaultAction || 'translation';
+            let lang = currentDefaultLang || 'es';
+            let modelId = currentDefaultModelId || (currentModels[0] ? currentModels[0].id : null);
 
-            // 4. Lógica de cambio dinámico del botón según el modo
-            btn.querySelector('#hm-mode-select').addEventListener('change', (e) => {
+            // Generar las opciones de IA para el selector combinado
+            const modelOptionsHtml = currentModels.map(m =>
+                `<option value="model_${m.id}">${m.name}</option>`
+            ).join('');
+
+            const txtTransText = chrome.i18n.getMessage("tbTransText") || "🌐 Traducir texto";
+            const txtDefModelLabel = chrome.i18n.getMessage("tbDefModelLabel") || "✨ Definir con Modelo IA:";
+            const txtLangEs = chrome.i18n.getMessage("tbLangEs") || "Español";
+            const txtLangEn = chrome.i18n.getMessage("tbLangEn") || "Inglés";
+            const txtOpenOptions = chrome.i18n.getMessage("tbOpenOptions") || "Abrir Panel de Opciones ↗";
+            const txtBtnTrans = chrome.i18n.getMessage("tbBtnTrans") || "Traducir";
+            const txtBtnDef = chrome.i18n.getMessage("tbBtnDef") || "Definir";
+            const txtSettingsTooltip = chrome.i18n.getMessage("tbSettingsTooltip") || "Ajustes de consulta";
+            const txtCloseTooltip = chrome.i18n.getMessage("tbCloseTooltip") || "Cerrar";
+
+            // Preparar el botón principal según la acción por defecto
+            let btnText = actionType === 'translation' ? txtBtnTrans : txtBtnDef;
+            let btnIcon = actionType === 'translation' ? "🌐" : "✨";
+            let selectValue = actionType === 'translation' ? "translation" : `model_${modelId}`;
+
+            btn.innerHTML = `
+                <div class="hm-minimal-row">
+                    <button id="hm-action-start" class="hm-btn-main" style="flex: 1;">
+                        <span id="hm-icon-start">${btnIcon}</span>
+                        <span id="hm-text-start">${btnText}</span>
+                    </button>
+                    <button id="hm-action-toggle-settings" class="hm-tool-btn" title="${txtSettingsTooltip}">⚙️</button>
+                    <button id="hm-action-close" class="hm-tool-btn" style="color: #ef4444; font-size: 22px; line-height: 0.5; padding: 0 6px;" title="${txtCloseTooltip}">&times;</button>
+                </div>
+                
+                <div id="hm-settings-popover" class="hm-settings-popover">
+                    <select id="hm-combined-select" class="hm-tool-select">
+                        <option value="translation">${txtTransText}</option>
+                        <optgroup label="${txtDefModelLabel}">
+                            ${modelOptionsHtml}
+                        </optgroup>
+                    </select>
+                    <select id="hm-lang-select" class="hm-tool-select">
+                        <option value="es">${txtLangEs}</option>
+                        <option value="en">${txtLangEn}</option>
+                    </select>
+                    <a href="#" id="hm-link-options" style="font-size: 11px; color: #4f46e5; text-align: center; text-decoration: none; margin-top: 4px;">${txtOpenOptions}</a>
+                </div>
+            `;
+
+            // Marcar los selectores con los valores actuales
+            btn.querySelector('#hm-combined-select').value = selectValue;
+            btn.querySelector('#hm-lang-select').value = lang;
+
+            // Lógica para cambiar dinámicamente el botón grande si el usuario cambia el selector combinado
+            btn.querySelector('#hm-combined-select').addEventListener('change', (e) => {
+                const val = e.target.value;
                 const icon = document.getElementById('hm-icon-start');
                 const text = document.getElementById('hm-text-start');
-                if (e.target.value === 'translation') {
-                    icon.innerText = '🌐'; // Icono de traducir
-                    text.innerText = txtBtnTrans;
+                if (val === 'translation') {
+                    icon.innerText = '🌐'; text.innerText = txtBtnTrans;
                 } else {
-                    icon.innerText = '✨'; // Icono de definir
-                    text.innerText = txtBtnDef;
+                    icon.innerText = '✨'; text.innerText = txtBtnDef;
                 }
             });
 
-            // 5. Lógica de clics (Cerrar, Iniciar o Ajustes)
+            // Lógica de clics principal
             btn.addEventListener('click', function (e) {
                 e.stopPropagation();
+
                 if (e.target.closest('#hm-action-close')) {
                     btn.remove();
-                } else if (e.target.closest('#hm-action-settings')) {
+                }
+                else if (e.target.closest('#hm-action-toggle-settings')) {
+                    // Muestra u oculta el popover de ajustes
+                    document.getElementById('hm-settings-popover').classList.toggle('show');
+                }
+                else if (e.target.closest('#hm-link-options')) {
+                    e.preventDefault();
                     chrome.runtime.sendMessage({ action: "openOptions" });
                     btn.remove();
-                } else if (e.target.closest('#hm-action-start')) {
-                    let mode = document.getElementById('hm-mode-select').value;
-                    let lang = document.getElementById('hm-lang-select').value;
-                    let modelId = document.getElementById('hm-model-select').value;
+                }
+                else if (e.target.closest('#hm-action-start')) {
+                    const combinedVal = document.getElementById('hm-combined-select').value;
+                    const finalLang = document.getElementById('hm-lang-select').value;
 
-                    // Guardamos el modelo para la próxima vez
-                    chrome.storage.local.set({ lastUsedModelId: modelId });
+                    let finalMode = combinedVal === 'translation' ? 'translation' : 'definition';
+                    let finalModelId = combinedVal.startsWith('model_') ? combinedVal.replace('model_', '') : null;
 
                     btn.remove();
-                    createPopup(rect, mode, lang, modelId);
+                    createPopup(rect, finalMode, finalLang, finalModelId);
                 }
             });
 
@@ -131,6 +149,7 @@ function handleTextSelection(event) {
 }
 
 document.addEventListener('mouseup', handleTextSelection);
+
 document.addEventListener('keyup', function (event) {
     if (event.key === 'Escape') return;
     handleTextSelection(event);
@@ -145,7 +164,15 @@ document.addEventListener('keydown', function (event) {
     }
 });
 
-// Rastreador de scroll para el botón
+document.addEventListener('mousedown', function (event) {
+    let btn = document.getElementById('hovermind-quick-btn');
+    if (btn && !btn.contains(event.target)) {
+        btn.remove();
+    }
+    // No cerramos el popup grande para que el usuario pueda copiar texto
+});
+
+// Rastreador de scroll para mantener el botón pegado al texto
 document.addEventListener('scroll', () => {
     let btn = document.getElementById('hovermind-quick-btn');
     if (btn) {
@@ -290,11 +317,3 @@ function createPopup(rect, mode, lang, modelId) {
         }
     });
 }
-
-document.addEventListener('mousedown', function (event) {
-    let btn = document.getElementById('hovermind-quick-btn');
-    if (btn && !btn.contains(event.target)) {
-        btn.remove();
-    }
-    // OJO: No cerramos el popup grande al hacer clic fuera para que el usuario pueda copiar texto
-});
