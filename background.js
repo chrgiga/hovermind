@@ -1,11 +1,15 @@
 // --- MOTOR DE CACHÉ ---
-// Ahora la clave de caché incluye el modelo para no mezclar respuestas
+function getCacheKey(text, mode, lang, model) {
+    // Limpia espacios múltiples, saltos de línea, caracteres invisibles y pasa a minúsculas
+    const cleanText = text.replace(/[\s\u200B-\u200D\uFEFF]+/g, ' ').trim().toLowerCase();
+    return `${mode}_${lang}_${model}_${cleanText}`;
+}
+
 function getCache(text, mode, lang, model) {
     return new Promise(resolve => {
         chrome.storage.local.get(['hovermind_cache'], (res) => {
             const cache = res.hovermind_cache || {};
-            const key = `${mode}_${lang}_${model}_${text}`;
-            resolve(cache[key] || null);
+            resolve(cache[getCacheKey(text, mode, lang, model)] || null);
         });
     });
 }
@@ -13,14 +17,10 @@ function getCache(text, mode, lang, model) {
 function setCache(text, mode, lang, model, responseText) {
     chrome.storage.local.get(['hovermind_cache'], (res) => {
         let cache = res.hovermind_cache || {};
-        const key = `${mode}_${lang}_${model}_${text}`;
-        cache[key] = responseText;
+        cache[getCacheKey(text, mode, lang, model)] = responseText;
 
-        // Límite de seguridad: guardamos solo las últimas 100 consultas para no saturar Chrome
         const keys = Object.keys(cache);
-        if (keys.length > 100) {
-            delete cache[keys[0]]; // Borra el registro más antiguo
-        }
+        if (keys.length > 100) delete cache[keys[0]];
 
         chrome.storage.local.set({ hovermind_cache: cache });
     });

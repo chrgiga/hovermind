@@ -1,5 +1,10 @@
 let currentSelectedText = "";
 let currentModels = [];
+let lastUsedModelId = null;
+
+chrome.storage.local.get(['lastUsedModelId'], (res) => {
+    if (res.lastUsedModelId) lastUsedModelId = res.lastUsedModelId;
+});
 
 chrome.storage.sync.get(['customModels'], (res) => {
     // Si no hay configurados, ponemos los de por defecto
@@ -41,9 +46,9 @@ function handleTextSelection(event) {
 
             // 2. Detectamos el idioma del navegador del usuario (es, en, etc.)
             const browserLang = chrome.i18n.getUILanguage().startsWith('es') ? 'es' : 'en';
-            // Generamos las opciones del `<select>` leyendo el Array
+            // Generamos las opciones y marcamos el último usado
             const modelOptionsHtml = currentModels.map(m =>
-                `<option value="${m.id}">${m.name}</option>`
+                `<option value="${m.id}" ${m.id === lastUsedModelId ? 'selected' : ''}>${m.name}</option>`
             ).join('');
 
             // 3. Estructura con X flotante y botón de configuración
@@ -108,6 +113,10 @@ function handleTextSelection(event) {
                     let mode = document.getElementById('hm-mode-select').value;
                     let lang = document.getElementById('hm-lang-select').value;
                     let modelId = document.getElementById('hm-model-select').value;
+
+                    // Guardamos el modelo para la próxima vez
+                    chrome.storage.local.set({ lastUsedModelId: modelId });
+
                     btn.remove();
                     createPopup(rect, mode, lang, modelId);
                 }
@@ -225,47 +234,37 @@ function createPopup(rect, mode, lang, modelId) {
     let displayedText = ""; // Aquí guardamos lo que ya se ha dibujado en pantalla
     let streamFinished = false; // Bandera para saber cuándo cerrar
     let hasError = false; // Bandera para frenar el motor
+    let isInstant = false; // Bandera para respuestas cacheadas
 
     // Motor de escritura fluida
     function typeWriterEffect() {
-        if (hasError) return; // Si hay error, no escribimos
+        if (hasError) return;
 
         if (textBuffer.length > 0) {
-            // 1. Al pintar la primera letra real, borramos el "Cargando..."
-            if (displayedText === "") {
-                responseContainer.innerHTML = "";
-            }
+            if (displayedText === "") responseContainer.innerHTML = "";
 
-            // 2. Acelerador dinámico: Si el buffer se llena muy rápido, cogemos de 2 en 2 o más 
-            // para que la animación no se quede atascada por detrás del tiempo real.
-            let charsToTake = Math.max(1, Math.floor(textBuffer.length / 15));
+            // Si es instantáneo, cogemos todo el buffer de golpe. Si no, de poco a poco.
+            let charsToTake = isInstant ? textBuffer.length : Math.max(1, Math.floor(textBuffer.length / 15));
             let nextChars = textBuffer.substring(0, charsToTake);
             textBuffer = textBuffer.substring(charsToTake);
 
             displayedText += nextChars;
+            responseContainer.innerHTML = `<p>${displayedText.replace(/\n/g, '<br>')}${isInstant ? '' : '<span style="font-weight: bold; animation: blink 1s step-end infinite;">|</span>'}</p>`;
 
-            // 3. Dibujamos el texto actual + el cursor simulado
-            responseContainer.innerHTML = `<p>${displayedText.replace(/\n/g, '<br>')}<span style="font-weight: bold; animation: blink 1s step-end infinite;">|</span></p>`;
-
-            // 4. Auto-scroll hacia abajo si el texto crece mucho
             const contentDiv = document.querySelector('.hovermind-content');
             if (contentDiv) contentDiv.scrollTop = contentDiv.scrollHeight;
 
-            // 5. Llamamos al siguiente frame en 20ms (Velocidad de escritura)
             setTimeout(typeWriterEffect, 20);
         } else {
             if (!streamFinished) {
-                // Si el buffer está vacío pero la IA aún no ha terminado, esperamos pacientemente
                 setTimeout(typeWriterEffect, 50);
             } else {
-                // Si ya terminó del todo, quitamos el cursor simulado y cerramos el puerto
                 responseContainer.innerHTML = `<p>${displayedText.replace(/\n/g, '<br>')}</p>`;
                 port.disconnect();
             }
         }
     }
 
-    // Arrancamos el motor de animación inmediatamente
     typeWriterEffect();
 
     // Escuchamos lo que entra por el túnel y lo metemos al Buffer
@@ -279,9 +278,11 @@ function createPopup(rect, mode, lang, modelId) {
                     chrome.runtime.sendMessage({ action: "openOptions" });
                 });
             }
-            streamFinished = true;
+
+            port.disconnect();
         }
         else if (response.chunk) {
+            if (response.isCached) isInstant = true; // Activamos el modo instantáneo
             textBuffer += response.chunk; // Metemos el trozo nuevo a la "sala de espera"
         }
         else if (response.done) {
