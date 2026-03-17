@@ -92,7 +92,7 @@ async function handleAIStreamRequest(request, port) {
         try {
             // Buscamos el modelo en la lista (o usamos un fallback por seguridad)
             const models = config.customModels || [
-                { id: "fallback", provider: "gemini", apiModel: "gemini-latest-flash" }
+                { id: "fallback", provider: "gemini", apiModel: "gemini-flash-latest" }
             ];
             const modelDef = models.find(m => m.id === selectedId) || models[0];
 

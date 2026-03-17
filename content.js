@@ -1,12 +1,16 @@
 let currentSelectedText = "";
 let currentModels = [];
 let lastUsedModelId = null;
+let lastUsedLang = null;
+let lastUsedAction = null;
 let currentDefaultLang = "es";
 let currentDefaultAction = "translation";
 let currentDefaultModelId = null;
 
-chrome.storage.local.get(['lastUsedModelId'], (res) => {
+chrome.storage.local.get(['lastUsedModelId', 'lastUsedLang', 'lastUsedAction'], (res) => {
     if (res.lastUsedModelId) lastUsedModelId = res.lastUsedModelId;
+    if (res.lastUsedLang) lastUsedLang = res.lastUsedLang;
+    if (res.lastUsedAction) lastUsedAction = res.lastUsedAction;
 });
 
 chrome.storage.sync.get(['customModels', 'defaultLang', 'defaultAction', 'defaultModelId'], (res) => {
@@ -47,9 +51,9 @@ function handleTextSelection(event) {
             btn.style.left = `${rect.left}px`;
 
             // 1. Leer los defaults (debes tenerlos guardados en variables globales arriba, igual que currentModels)
-            let actionType = currentDefaultAction || 'translation';
-            let lang = currentDefaultLang || 'es';
-            let modelId = currentDefaultModelId || (currentModels[0] ? currentModels[0].id : null);
+            let actionType = lastUsedAction || currentDefaultAction || 'translation';
+            let lang = lastUsedLang || currentDefaultLang || 'es';
+            let modelId = lastUsedModelId || currentDefaultModelId || (currentModels[0] ? currentModels[0].id : null);
 
             // Generar las opciones de IA para el selector combinado
             const modelOptionsHtml = currentModels.map(m =>
@@ -134,6 +138,17 @@ function handleTextSelection(event) {
 
                     let finalMode = combinedVal === 'translation' ? 'translation' : 'definition';
                     let finalModelId = combinedVal.startsWith('model_') ? combinedVal.replace('model_', '') : null;
+
+                    // Actualizamos las variables de memoria y guardamos en Local Storage
+                    lastUsedAction = finalMode;
+                    lastUsedLang = finalLang;
+                    if (finalModelId) lastUsedModelId = finalModelId;
+
+                    chrome.storage.local.set({
+                        lastUsedAction: finalMode,
+                        lastUsedLang: finalLang,
+                        lastUsedModelId: lastUsedModelId
+                    });
 
                     btn.remove();
                     createPopup(rect, finalMode, finalLang, finalModelId);
