@@ -1,6 +1,5 @@
 // --- MOTOR DE CACHÉ ---
 function getCacheKey(text, mode, lang, model) {
-    // Limpia espacios múltiples, saltos de línea, caracteres invisibles y pasa a minúsculas
     const cleanText = text.replace(/[\s\u200B-\u200D\uFEFF]+/g, ' ').trim().toLowerCase();
     return `${mode}_${lang}_${model}_${cleanText}`;
 }
@@ -9,7 +8,14 @@ function getCache(text, mode, lang, model) {
     return new Promise(resolve => {
         chrome.storage.local.get(['hovermind_cache'], (res) => {
             const cache = res.hovermind_cache || {};
-            resolve(cache[getCacheKey(text, mode, lang, model)] || null);
+            const entry = cache[getCacheKey(text, mode, lang, model)];
+
+            // Retrocompatibilidad: si es antiguo (string) devuelve eso, si es nuevo (objeto) devuelve entry.text
+            if (entry) {
+                resolve(typeof entry === 'string' ? entry : entry.text);
+            } else {
+                resolve(null);
+            }
         });
     });
 }
@@ -17,10 +23,23 @@ function getCache(text, mode, lang, model) {
 function setCache(text, mode, lang, model, responseText) {
     chrome.storage.local.get(['hovermind_cache'], (res) => {
         let cache = res.hovermind_cache || {};
-        cache[getCacheKey(text, mode, lang, model)] = responseText;
 
-        const keys = Object.keys(cache);
-        if (keys.length > 100) delete cache[keys[0]];
+        // Guardamos un objeto con el texto y la fecha (timestamp)
+        cache[getCacheKey(text, mode, lang, model)] = {
+            text: responseText,
+            timestamp: Date.now()
+        };
+
+        const entries = Object.entries(cache);
+        if (entries.length > 100) {
+            // Ordenamos de más antiguo a más nuevo para borrar el más viejo
+            entries.sort((a, b) => {
+                const timeA = typeof a[1] === 'object' ? a[1].timestamp : 0;
+                const timeB = typeof b[1] === 'object' ? b[1].timestamp : 0;
+                return timeA - timeB;
+            });
+            delete cache[entries[0][0]]; // Borra el más antiguo
+        }
 
         chrome.storage.local.set({ hovermind_cache: cache });
     });

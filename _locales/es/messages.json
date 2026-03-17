@@ -136,5 +136,8 @@
   },
   "tblCacheResponse": {
     "message": "Respuesta Guardada"
+  },
+  "tblCacheDate": {
+    "message": "Fecha"
   }
 }
