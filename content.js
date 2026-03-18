@@ -77,6 +77,8 @@ function handleTextSelection(event) {
 
             btn.innerHTML = `
                 <div class="hm-minimal-row">
+                    <div id="hm-toolbar-drag" style="cursor: grab; padding: 0 4px; color: #9ca3af; display: flex; align-items: center; font-size: 16px; user-select: none;" title="Mover barra">⋮⋮</div>
+
                     <button id="hm-action-start" class="hm-btn-main" style="flex: 1;">
                         <span id="hm-icon-start">${btnIcon}</span>
                         <span id="hm-text-start">${btnText}</span>
@@ -139,7 +141,6 @@ function handleTextSelection(event) {
                     let finalMode = combinedVal === 'translation' ? 'translation' : 'definition';
                     let finalModelId = combinedVal.startsWith('model_') ? combinedVal.replace('model_', '') : null;
 
-                    // Actualizamos las variables de memoria y guardamos en Local Storage
                     lastUsedAction = finalMode;
                     lastUsedLang = finalLang;
                     if (finalModelId) lastUsedModelId = finalModelId;
@@ -156,6 +157,36 @@ function handleTextSelection(event) {
             });
 
             document.body.appendChild(btn);
+
+            const dragHandle = document.getElementById('hm-toolbar-drag');
+            let isDraggingToolbar = false;
+            let startX, startY, initialLeft, initialTop;
+
+            dragHandle.addEventListener('mousedown', (e) => {
+                isDraggingToolbar = true;
+                dragHandle.style.cursor = 'grabbing';
+                startX = e.clientX;
+                startY = e.clientY;
+                initialLeft = parseFloat(btn.style.left) || rect.left;
+                initialTop = parseFloat(btn.style.top) || (rect.bottom + 8);
+                e.preventDefault(); // Evita que se seleccione texto al arrastrar
+                e.stopPropagation(); // Evita que se cierre la barra por el mousedown del document
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDraggingToolbar || !document.getElementById('hovermind-quick-btn')) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                btn.style.left = `${initialLeft + dx}px`;
+                btn.style.top = `${initialTop + dy}px`;
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isDraggingToolbar) {
+                    isDraggingToolbar = false;
+                    dragHandle.style.cursor = 'grab';
+                }
+            });
         } else {
             if (existingBtn) existingBtn.remove();
             currentSelectedText = "";

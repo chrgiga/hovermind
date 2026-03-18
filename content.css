@@ -39,7 +39,7 @@
     flex-direction: column;
     padding: 6px;
     font-family: system-ui, -apple-system, sans-serif;
-    min-width: 175px;
+    min-width: 200px;
 }
 
 /* La fila principal siempre visible */
