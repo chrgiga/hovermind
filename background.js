@@ -1,4 +1,4 @@
-// --- MOTOR DE CACHÉ ---
+// Cache engine
 function getCacheKey(text, mode, lang, model) {
     const cleanText = text.replace(/[\s\u200B-\u200D\uFEFF]+/g, ' ').trim().toLowerCase();
     return `${mode}_${lang}_${model}_${cleanText}`;
@@ -10,7 +10,7 @@ function getCache(text, mode, lang, model) {
             const cache = res.hovermind_cache || {};
             const entry = cache[getCacheKey(text, mode, lang, model)];
 
-            // Retrocompatibilidad: si es antiguo (string) devuelve eso, si es nuevo (objeto) devuelve entry.text
+            // Backward compatibility: handle old string entries and new object entries
             if (entry) {
                 resolve(typeof entry === 'string' ? entry : entry.text);
             } else {
@@ -24,7 +24,7 @@ function setCache(text, mode, lang, model, responseText) {
     chrome.storage.local.get(['hovermind_cache'], (res) => {
         let cache = res.hovermind_cache || {};
 
-        // Guardamos un objeto con el texto y la fecha (timestamp)
+        // Store object with text and timestamp
         cache[getCacheKey(text, mode, lang, model)] = {
             text: responseText,
             timestamp: Date.now()
@@ -32,20 +32,20 @@ function setCache(text, mode, lang, model, responseText) {
 
         const entries = Object.entries(cache);
         if (entries.length > 100) {
-            // Ordenamos de más antiguo a más nuevo para borrar el más viejo
+            // Sort by timestamp to remove oldest
             entries.sort((a, b) => {
                 const timeA = typeof a[1] === 'object' ? a[1].timestamp : 0;
                 const timeB = typeof b[1] === 'object' ? b[1].timestamp : 0;
                 return timeA - timeB;
             });
-            delete cache[entries[0][0]]; // Borra el más antiguo
+            delete cache[entries[0][0]]; // Delete the oldest
         }
 
         chrome.storage.local.set({ hovermind_cache: cache });
     });
 }
 
-// --- CONEXIONES ---
+// Connections
 chrome.runtime.onConnect.addListener((port) => {
     if (port.name === "hovermind-stream") {
         port.onMessage.addListener((request) => {
@@ -67,16 +67,14 @@ async function handleAIStreamRequest(request, port) {
     const text = request.text.trim();
     const mode = request.mode;
     const lang = request.lang;
-    const selectedId = request.modelId; // ID del modelo seleccionado en la barra
 
     if (!text) {
         port.postMessage({ done: true });
         return;
     }
 
-    // DESVÍO A TRADUCCIÓN GRATUITA
+    // REDIRECT TO FREE TRANSLATION
     if (mode === 'translation') {
-        // Interceptor de caché específico para traducciones (usamos 'mymemory' como modelo)
         const cachedResponse = await getCache(text, mode, lang, 'mymemory');
         if (cachedResponse) {
             port.postMessage({ chunk: cachedResponse });
@@ -87,21 +85,20 @@ async function handleAIStreamRequest(request, port) {
         return;
     }
 
-    // LLAMADA A IAs (Definición) - Motor Dinámico BYOM
-    chrome.storage.sync.get(['customModels', 'geminiKey', 'openaiKey', 'anthropicKey', 'deepseekKey'], async (config) => {
+    // CALL TO AIs (Definition/Analysis) - Agnostic Engine
+    chrome.storage.sync.get(['aiConfigs'], async (config) => {
         try {
-            // Buscamos el modelo en la lista (o usamos un fallback por seguridad)
-            const models = config.customModels || [
-                { id: "fallback", provider: "gemini", apiModel: "gemini-flash-latest" }
-            ];
-            const modelDef = models.find(m => m.id === selectedId) || models[0];
+            // Look for the single active configuration
+            const activeConfig = config.aiConfigs?.find(c => c.isActive);
 
-            if (!modelDef) throw new Error("No hay modelos configurados en las opciones.");
+            if (!activeConfig || !activeConfig.baseUrl) {
+                return port.postMessage({ errorHtml: getMissingKeyUI() });
+            }
 
-            const provider = modelDef.provider;
-            const apiModel = modelDef.apiModel;
+            const providerFormat = activeConfig.provider; // 'openai', 'anthropic', or 'gemini'
+            const apiModel = activeConfig.model;
 
-            // INTERCEPTOR DE CACHÉ PARA IA (Usando el modelo exacto)
+            // CACHE INTERCEPTOR
             const cachedResponse = await getCache(text, mode, lang, apiModel);
             if (cachedResponse) {
                 port.postMessage({ chunk: cachedResponse });
@@ -109,24 +106,18 @@ async function handleAIStreamRequest(request, port) {
                 return;
             }
 
-            if (provider === 'openai') {
-                if (!config.openaiKey) return port.postMessage({ errorHtml: getMissingKeyUI() });
-                await callOpenAIStream(text, config.openaiKey, port, mode, lang, apiModel);
+            // ROUTER BY FORMAT
+            if (providerFormat === 'openai') {
+                await callOpenAIFormatStream(text, activeConfig, port, mode, lang);
             }
-            else if (provider === 'gemini') {
-                if (!config.geminiKey) return port.postMessage({ errorHtml: getMissingKeyUI() });
-                await callGeminiStream(text, config.geminiKey, port, mode, lang, apiModel);
+            else if (providerFormat === 'anthropic') {
+                await callAnthropicFormatStream(text, activeConfig, port, mode, lang);
             }
-            else if (provider === 'anthropic') {
-                if (!config.anthropicKey) return port.postMessage({ errorHtml: getMissingKeyUI() });
-                await callAnthropicStream(text, config.anthropicKey, port, mode, lang, apiModel);
-            }
-            else if (provider === 'deepseek') {
-                if (!config.deepseekKey) return port.postMessage({ errorHtml: getMissingKeyUI() });
-                await callDeepSeekStream(text, config.deepseekKey, port, mode, lang, apiModel);
+            else if (providerFormat === 'gemini') {
+                await callGeminiFormatStream(text, activeConfig, port, mode, lang);
             }
             else {
-                port.postMessage({ errorHtml: await buildFallbackUI(text, "Proveedor de IA no reconocido.") });
+                throw new Error(chrome.i18n.getMessage("errRecognized") || "Unrecognized API format.");
             }
         } catch (error) {
             port.postMessage({ errorHtml: await buildFallbackUI(text, error.message) });
@@ -171,24 +162,36 @@ async function readStream(response, port, extractTextFn, text, mode, lang, apiMo
         port.postMessage({ errorHtml: await buildFallbackUI("Error", chrome.i18n.getMessage("errStream")) });
     } finally {
         if (fullResponseText.trim().length > 0) {
-            setCache(text, mode, lang, apiModel, fullResponseText); // Guardamos usando apiModel
+            setCache(text, mode, lang, apiModel, fullResponseText);
         }
         port.postMessage({ done: true });
     }
 }
 
-// --- GENERADOR DINÁMICO DE PROMPTS ---
-function buildDynamicPrompt(lang, text = '') {
-    let prompt = lang == 'es' ? "Eres un asistente experto. Tu tarea es analizar el texto indicado. REGLA ESTRICTA: Debes responder SIEMPRE en español, sin importar en qué idioma esté el texto original. Explica de forma clara y concisa el contexto o significado del texto." : "You are an expert assistant. Your task is to analyze the indicated text. STRICT RULE: You must ALWAYS answer in english, regardless of the original language. Clearly and concisely explain the context or meaning of the text.";
+// Language code to Name mapping for AI Prompts
+const LANG_MAP = {
+    "es": "Spanish", "en": "English", "fr": "French", "de": "German", "it": "Italian",
+    "pt": "Portuguese", "ja": "Japanese", "zh": "Chinese", "ru": "Russian", "ko": "Korean",
+    "ar": "Arabic", "hi": "Hindi", "nl": "Dutch", "tr": "Turkish", "pl": "Polish",
+    "sv": "Swedish", "da": "Danish", "fi": "Finnish", "no": "Norwegian", "cs": "Czech",
+    "el": "Greek", "he": "Hebrew", "id": "Indonesian", "ro": "Romanian", "hu": "Hungarian",
+    "sk": "Slovak", "bg": "Bulgarian", "hr": "Croatian", "uk": "Ukrainian", "ca": "Catalan"
+};
+
+// Dynamic multi-language prompt generator
+function buildDynamicPrompt(langCode, text = '') {
+    // Look up English name for the prompt. Fallback to English.
+    let langName = LANG_MAP[langCode] || "English";
+
+    let prompt = `You are an expert assistant. Your task is to analyze the indicated text. STRICT RULE: You must ALWAYS answer in ${langName}, regardless of the original language of the text. Clearly and concisely explain the context or meaning of the text.`;
 
     if (text.length > 0) {
-        prompt += "\n\n" + (lang == 'es' ? "Texto indicado" : "Indicated text") + ": " + text;
+        prompt += "\n\nIndicated text: " + text;
     }
-
     return prompt;
 }
 
-// --- TRADUCTOR GRATUITO (MyMemory API) ---
+// Free Translation (MyMemory API)
 async function callFreeTranslation(text, targetLang, port, mode) {
     const langPair = `Autodetect|${targetLang}`;
     const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`;
@@ -199,97 +202,87 @@ async function callFreeTranslation(text, targetLang, port, mode) {
 
         if (data.responseData && data.responseData.translatedText) {
             const resultText = data.responseData.translatedText;
-            setCache(text, mode, targetLang, 'mymemory', resultText); // GUARDAMOS EN CACHÉ
+            setCache(text, mode, targetLang, 'mymemory', resultText);
             port.postMessage({ chunk: resultText });
             port.postMessage({ done: true });
         } else {
-            throw new Error("No se pudo traducir el texto.");
+            throw new Error(chrome.i18n.getMessage("errTranslation") || "Could not translate text.");
         }
     } catch (error) {
-        port.postMessage({ errorHtml: await buildFallbackUI(text, "Error en el servicio de traducción gratuito.") });
+        port.postMessage({ errorHtml: await buildFallbackUI(text, chrome.i18n.getMessage("errFreeTrans") || "Error in free translation service.") });
         port.postMessage({ done: true });
     }
 }
 
-// --- Proveedores Dinámicos ---
-async function callOpenAIStream(text, key, port, mode, lang, apiModel) {
+// Universal Format Engines
+
+async function callOpenAIFormatStream(text, config, port, mode, lang) {
     const prompt = buildDynamicPrompt(lang);
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+
+    // Since it's a universal format (OpenAI), we only inject the Bearer Token if the user has provided an API Key
+    const headers = { 'Content-Type': 'application/json' };
+    if (config.apiKey) headers['Authorization'] = `Bearer ${config.apiKey}`;
+
+    const response = await fetch(config.baseUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+        headers: headers,
         body: JSON.stringify({
-            model: apiModel, // Dinámico
+            model: config.model,
             stream: true,
             messages: [{ role: "system", content: prompt }, { role: "user", content: text }]
         })
     });
-    if (!response.ok) throw new Error(chrome.i18n.getMessage("errOpenAI") || "Llave incorrecta");
-    await readStream(response, port, (parsed) => parsed.choices?.[0]?.delta?.content, text, mode, lang, apiModel);
+
+    if (!response.ok) throw new Error(`${chrome.i18n.getMessage("errVerifyKey") || "Verify your Endpoint and API Key."} (HTTP ${response.status})`);
+    await readStream(response, port, (parsed) => parsed.choices?.[0]?.delta?.content, text, mode, lang, config.model);
 }
 
-async function callGeminiStream(text, key, port, mode, lang, apiModel) {
-    const prompt = buildDynamicPrompt(lang, text);
-    // Dinámico en la URL de Google
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${apiModel}:streamGenerateContent?alt=sse&key=${key}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-    });
-    console.log(response);
-    if (!response.ok) {
-        let apiErrorMsg = `HTTP Error ${response.status}`;
-        try {
-            const errorData = await response.json();
-            apiErrorMsg = errorData.error?.message || apiErrorMsg;
-        } catch (e) { }
-
-        throw new Error(`Google API: ${apiErrorMsg}`);
-    }
-    await readStream(response, port, (parsed) => parsed.candidates?.[0]?.content?.parts?.[0]?.text, text, mode, lang, apiModel);
-}
-
-async function callAnthropicStream(text, key, port, mode, lang, apiModel) {
+async function callAnthropicFormatStream(text, config, port, mode, lang) {
     const prompt = buildDynamicPrompt(lang);
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(config.baseUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'x-api-key': key,
+            'x-api-key': config.apiKey,
             'anthropic-version': '2023-06-01',
             'anthropic-dangerous-direct-browser-access': 'true'
         },
         body: JSON.stringify({
-            model: apiModel, // Dinámico
+            model: config.model,
             max_tokens: 1024,
             stream: true,
             system: prompt,
             messages: [{ role: "user", content: text }]
         })
     });
-    if (!response.ok) throw new Error(chrome.i18n.getMessage("errAnthropic") || "Llave incorrecta");
-    await readStream(response, port, (parsed) => (parsed.type === 'content_block_delta') ? parsed.delta?.text : null, text, mode, lang, apiModel);
+
+    if (!response.ok) throw new Error(`${chrome.i18n.getMessage("errVerifyAnthropic") || "Verify your API Key de Anthropic."} (HTTP ${response.status})`);
+    await readStream(response, port, (parsed) => (parsed.type === 'content_block_delta') ? parsed.delta?.text : null, text, mode, lang, config.model);
 }
 
-async function callDeepSeekStream(text, key, port, mode, lang, apiModel) {
-    const prompt = buildDynamicPrompt(lang);
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
+async function callGeminiFormatStream(text, config, port, mode, lang) {
+    const prompt = buildDynamicPrompt(lang, text);
+
+    // Gemini requires the model in the URL and the Key as a GET parameter
+    let finalUrl = config.baseUrl.replace('{model}', config.model);
+    if (!finalUrl.includes('?key=')) finalUrl += (finalUrl.includes('?') ? '&' : '?') + `key=${config.apiKey}`;
+    if (!finalUrl.includes('alt=sse')) finalUrl += '&alt=sse';
+
+    const response = await fetch(finalUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-        body: JSON.stringify({
-            model: apiModel, // Dinámico
-            stream: true,
-            messages: [{ role: "system", content: prompt }, { role: "user", content: text }]
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
     });
-    if (!response.ok) throw new Error(chrome.i18n.getMessage("errDeepSeek") || "Llave incorrecta");
-    await readStream(response, port, (parsed) => parsed.choices?.[0]?.delta?.content, text, mode, lang, apiModel);
+
+    if (!response.ok) throw new Error(`${chrome.i18n.getMessage("errVerifyGemini") || "Verify your API Key de Gemini."} (HTTP ${response.status})`);
+    await readStream(response, port, (parsed) => parsed.candidates?.[0]?.content?.parts?.[0]?.text, text, mode, lang, config.model);
 }
 
-// --- FALLBACKS Y UIs DE ERROR ---
+// Fallbacks and Error UIs
 function getMissingKeyUI() {
-    const msgMissing = chrome.i18n.getMessage("missingKey") || "Falta API Key";
-    const msgBtn = chrome.i18n.getMessage("configBtn") || "Configurar";
-    return `<div style="text-align: center; padding: 10px 0;"><p style="color: #ef4444; margin-top: 0;">${msgMissing}</p><button id="hovermind-open-options-btn" style="background-color: #4f46e5; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 5px;">${msgBtn}</button></div>`;
+    const msgMissing = chrome.i18n.getMessage("missingKey") || "Falta configurar la IA";
+    const msgBtn = chrome.i18n.getMessage("configBtn") || "Abrir Opciones";
+    return `<div style="text-align: center; padding: 10px 0;"><p style="color: #ef4444; margin-top: 0; font-weight: bold;">${msgMissing}</p><button id="hovermind-open-options-btn" style="background-color: #4f46e5; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 5px;">${msgBtn}</button></div>`;
 }
 
 async function buildFallbackUI(text, errorMsg = null) {
@@ -297,7 +290,7 @@ async function buildFallbackUI(text, errorMsg = null) {
     const query = encodeURIComponent(cleanText);
     const txtSearch = chrome.i18n.getMessage("searchGoogle") || "Buscar en Google";
     let html = ``;
-    if (errorMsg) html += `<p style="color: #ef4444; font-size: 12px; margin-bottom: 12px; margin-top: 0;"><em>Error: ${errorMsg}</em></p>`;
+    if (errorMsg) html += `<p style="color: #ef4444; font-size: 13px; margin-bottom: 15px; margin-top: 0; background: #fee2e2; padding: 10px; border-radius: 6px;"><em>🚨 ${errorMsg}</em></p>`;
     html += `<div style="margin-bottom: 15px;"><a href="https://www.google.com/search?q=${query}" target="_blank" style="display: inline-block; background-color: #f3f4f6; color: #1f2937; padding: 8px 12px; border-radius: 6px; text-decoration: none; font-weight: bold; border: 1px solid #d1d5db;">${txtSearch}</a></div>`;
     return html;
 }

@@ -15,157 +15,37 @@
     "message": "❌ No has configurado tu API Key."
   },
   "configBtn": {
-    "message": "⚙️ Configurar API Key"
+    "message": "⚙️ Configurar IA"
   },
   "searchGoogle": {
     "message": "🔍 Buscar en Google"
   },
-  "wikiTitle": {
-    "message": "📖 Wikipedia:"
-  },
-  "readMore": {
-    "message": "Leer más ↗"
-  },
-  "noWiki": {
-    "message": "No se encontraron resultados en Wikipedia."
-  },
-  "saveSuccess": {
-    "message": "¡Configuración guardada con éxito!"
-  },
-  "unexError": {
-    "message": "❌ Error inesperado: "
-  },
-  "aiFailed": {
-    "message": "La IA falló ("
-  },
-  "alternatives": {
-    "message": "). Alternativas:"
-  },
-  "errOpenAI": {
-    "message": "Llave de OpenAI incorrecta o sin saldo"
-  },
-  "errGemini": {
-    "message": "Llave de Google incorrecta"
-  },
-  "errAnthropic": {
-    "message": "Llave de Anthropic incorrecta"
-  },
-  "errDeepSeek": {
-    "message": "Llave de DeepSeek incorrecta"
-  },
   "errStream": {
     "message": "La conexión de streaming se interrumpió."
   },
-  "modeDef": {
-    "message": "Definición"
+  "errRecognized": {
+    "message": "Formato de API no reconocido."
   },
-  "modeTrans": {
-    "message": "Traducción"
+  "errTranslation": {
+    "message": "No se pudo traducir el texto."
   },
-  "btnDef": {
-    "message": "Definir"
+  "errFreeTrans": {
+    "message": "Error en el servicio de traducción gratuito."
   },
-  "btnTrans": {
-    "message": "Traducir"
+  "errVerifyKey": {
+    "message": "Verifica tu Endpoint y API Key."
   },
-  "optTitle": {
-    "message": "Configuración | HoverMind"
+  "errVerifyAnthropic": {
+    "message": "Verifica tu API Key de Anthropic."
   },
-  "optSubheader": {
-    "message": "Configura tus proveedores y gestiona los modelos disponibles."
+  "errVerifyGemini": {
+    "message": "Verifica tu API Key de Gemini."
   },
-  "optKeysTitle": {
-    "message": "🔑 Claves de Acceso (API Keys)"
+  "btnBack": {
+    "message": "Atrás"
   },
-  "optSaveKeysBtn": {
-    "message": "Guardar Claves"
-  },
-  "optKeysSuccess": {
-    "message": "¡Claves guardadas correctamente!"
-  },
-  "optMgrTitle": {
-    "message": "🧠 Gestor de Modelos (BYOM)"
-  },
-  "optMgrDesc": {
-    "message": "Estos son los modelos que aparecerán en la barra flotante al seleccionar un texto."
-  },
-  "tblName": {
-    "message": "Nombre Visible"
-  },
-  "tblProvider": {
-    "message": "Proveedor"
-  },
-  "tblApiId": {
-    "message": "ID de la API"
-  },
-  "tblActions": {
-    "message": "Acciones"
-  },
-  "phName": {
-    "message": "Ej. GPT-4 Rápido"
-  },
-  "phApiId": {
-    "message": "Ej. gpt-4o-mini"
-  },
-  "btnAdd": {
-    "message": "Añadir"
-  },
-  "btnUpdate": {
-    "message": "Actualizar"
-  },
-  "btnCancel": {
-    "message": "Cancelar"
-  },
-  "confirmDelete": {
-    "message": "¿Estás seguro de que deseas borrar el modelo"
-  },
-  "alertFill": {
-    "message": "Por favor, rellena el Nombre y el ID del API."
-  },
-  "optCacheTitle": {
-    "message": "🗄️ Caché de Respuestas"
-  },
-  "optCacheDesc": {
-    "message": "Gestiona el historial de textos cacheados para ahorrar tokens."
-  },
-  "btnEmptyCache": {
-    "message": "Vaciar Toda la Caché"
-  },
-  "tblCacheText": {
-    "message": "Texto Original"
-  },
-  "tblCacheResponse": {
-    "message": "Respuesta Guardada"
-  },
-  "tblCacheDate": {
-    "message": "Fecha"
-  },
-  "optGeneralTitle": {
-    "message": "⚙️ Ajustes Generales"
-  },
-  "optDefLang": {
-    "message": "Idioma por defecto:"
-  },
-  "optLangEs": {
-    "message": "Español (ES)"
-  },
-  "optLangEn": {
-    "message": "Inglés (EN)"
-  },
-  "optDefAction": {
-    "message": "Acción por defecto:"
-  },
-  "optActionTrans": {
-    "message": "🌐 Traducir"
-  },
-  "optActionDef": {
-    "message": "✨ Definir (IA)"
-  },
-  "optSaveGeneralBtn": {
-    "message": "Guardar Ajustes Generales"
-  },
-  "optGeneralSuccess": {
-    "message": "¡Ajustes guardados!"
+  "noResults": {
+    "message": "No se encontraron resultados..."
   },
   "tbTransText": {
     "message": "🌐 Traducir texto"
@@ -173,20 +53,11 @@
   "tbDefModelLabel": {
     "message": "✨ Definir con Modelo IA:"
   },
-  "tbLangEs": {
-    "message": "Español"
-  },
-  "tbLangEn": {
-    "message": "Inglés"
+  "tbLangLabel": {
+    "message": "Idioma de respuesta:"
   },
   "tbOpenOptions": {
     "message": "Abrir Panel de Opciones ↗"
-  },
-  "tbBtnTrans": {
-    "message": "Traducir"
-  },
-  "tbBtnDef": {
-    "message": "Definir"
   },
   "tbSettingsTooltip": {
     "message": "Ajustes de consulta"
@@ -194,7 +65,112 @@
   "tbCloseTooltip": {
     "message": "Cerrar"
   },
-  "tblDefault": {
-    "message": "Por defecto"
+  "optTitle": {
+    "message": "Configuración | HoverMind"
+  },
+  "optAjustesTitle": {
+    "message": "✨ Ajustes de HoverMind"
+  },
+  "optAiTitle": {
+    "message": "🤖 Proveedores y Modelos de IA"
+  },
+  "optAiDesc": {
+    "message": "Añade las APIs que desees utilizar. Solo una configuración puede estar activa al mismo tiempo."
+  },
+  "optProviderOpenAI": {
+    "message": "Compatible con OpenAI (AIMLAPI, OpenRouter, DeepSeek, Groq, Local...)"
+  },
+  "optProviderAnthropic": {
+    "message": "Anthropic (Claude)"
+  },
+  "optProviderGemini": {
+    "message": "Google Gemini"
+  },
+  "optAddApi": {
+    "message": "+ Añadir nueva API..."
+  },
+  "optSaveAiBtn": {
+    "message": "Guardar Configuración de APIs"
+  },
+  "optHistorialTitle": {
+    "message": "🗂️ Historial y Caché"
+  },
+  "optHistorialDesc": {
+    "message": "La extensión guarda localmente las respuestas de la IA para acelerar consultas repetidas y ahorrar peticiones a tu API. Puedes gestionar tu historial aquí."
+  },
+  "optClearCacheBtn": {
+    "message": "Vaciar toda la caché"
+  },
+  "cacheEmpty": {
+    "message": "La caché está vacía."
+  },
+  "cacheTraduccion": {
+    "message": "Traducción"
+  },
+  "cacheDefinicion": {
+    "message": "Definición"
+  },
+  "cacheShowMore": {
+    "message": "⬇ Mostrar más"
+  },
+  "cacheShowLess": {
+    "message": "⬆ Mostrar menos"
+  },
+  "cacheConfirmClear": {
+    "message": "¿Estás seguro de que quieres borrar el historial de respuestas? La próxima vez que selecciones los mismos textos, la IA consumirá recursos de tu API."
+  },
+  "cacheDatePrefix": {
+    "message": "Guardado el: "
+  },
+  "rowNoApis": {
+    "message": "No hay APIs configuradas. Selecciona una abajo."
+  },
+  "rowEndpoint": {
+    "message": "URL del Endpoint:"
+  },
+  "rowApiKey": {
+    "message": "API Key:"
+  },
+  "rowModelName": {
+    "message": "Nombre del Modelo:"
+  },
+  "rowDelete": {
+    "message": "Borrar configuración"
+  },
+  "statusSaved": {
+    "message": "¡Configuración guardada con éxito!"
+  },
+  "privTitle": {
+    "message": "Política de Privacidad | HoverMind"
+  },
+  "privHeader": {
+    "message": "Política de Privacidad de HoverMind"
+  },
+  "privLastUpdated": {
+    "message": "Última actualización: Marzo de 2026"
+  },
+  "privSection1Title": {
+    "message": "1. Recopilación de datos"
+  },
+  "privSection1Desc": {
+    "message": "HoverMind ('la Extensión') no recopila, transmite, distribuye ni vende ningún dato personal del usuario a los desarrolladores ni a terceros."
+  },
+  "privSection2Title": {
+    "message": "2. Almacenamiento local"
+  },
+  "privSection2Desc": {
+    "message": "Toda la información necesaria para el funcionamiento de la Extensión, incluyendo las claves de acceso a las APIs (API Keys), las preferencias del usuario, la configuración de los modelos y el historial de textos cacheados, se almacena de forma local y cifrada en el dispositivo del usuario utilizando las herramientas nativas del navegador (Chrome Storage)."
+  },
+  "privSection3Title": {
+    "message": "3. Interacción con servicios de terceros"
+  },
+  "privSection3Desc": {
+    "message": "Cuando el usuario selecciona un texto y solicita una definición o traducción, la Extensión envía dicho texto directamente a las APIs de los proveedores configurados por el usuario (como OpenAI, Google Gemini, Anthropic, DeepSeek o MyMemory). El tratamiento de esa información está sujeto a las políticas de privacidad individuales de dichos proveedores. La Extensión no actúa como intermediario ni almacena estas comunicaciones fuera del dispositivo local."
+  },
+  "privSection4Title": {
+    "message": "4. Cambios en la Política de Privacidad"
+  },
+  "privSection4Desc": {
+    "message": "Cualquier cambio futuro en esta política se reflejará en esta misma página y se notificará en las notas de la versión de la Extensión."
   }
 }

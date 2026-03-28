@@ -99,11 +99,11 @@
     background: #d1d5db;
 }
 
-/* Botón Principal de Acción (Fila Inferior) */
+/* Main Action Button (Bottom Row) */
 .hm-btn-main {
     width: 100%;
     background: #4f46e5;
-    /* Color azul/índigo vibrante */
+    /* Vibrant blue/indigo color */
     color: white;
     border: none;
     padding: 6px 0;
@@ -122,7 +122,7 @@
     background: #4338ca;
 }
 
-/* Evitamos que el texto interfiera con el clic del botón principal */
+/* Prevent text from interfering with main button click */
 #hovermind-action {
     pointer-events: none;
 }
@@ -170,10 +170,10 @@
     cursor: grab;
     /* Indicador visual de que se puede arrastrar */
     user-select: none;
-    /* Evita que el texto del título se seleccione al arrastrar */
+    /* Prevent title text selection while dragging */
 }
 
-/* Cuando se está arrastrando activamente, la mano se cierra */
+/* When actively dragging, the hand closes */
 .hovermind-header:active {
     cursor: grabbing;
 }
@@ -184,7 +184,7 @@
     color: #4f46e5;
 }
 
-/* Botón de cerrar (la X grande del popup) */
+/* Close button (the big X in the popup) */
 #hovermind-close-btn {
     background: none;
     border: none;
@@ -203,7 +203,7 @@
 .hovermind-content {
     padding: 15px;
     padding-bottom: 25px;
-    /* Más espacio al fondo para asegurar el scroll */
+    /* More space at the bottom to ensure scrolling */
     font-size: 14px;
     line-height: 1.5;
     max-height: 300px;
@@ -211,7 +211,7 @@
     /* Scroll si el texto es muy largo */
 }
 
-/* Animación de carga de la IA */
+/* AI loading animation */
 .hovermind-loading {
     color: #6b7280;
     font-style: italic;

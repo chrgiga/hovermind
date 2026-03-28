@@ -15,157 +15,37 @@
     "message": "❌ You haven't configured your API Key."
   },
   "configBtn": {
-    "message": "⚙️ Configure API Key"
+    "message": "⚙️ Configure AI"
   },
   "searchGoogle": {
     "message": "🔍 Search on Google"
   },
-  "wikiTitle": {
-    "message": "📖 Wikipedia:"
-  },
-  "readMore": {
-    "message": "Read more ↗"
-  },
-  "noWiki": {
-    "message": "No results found on Wikipedia."
-  },
-  "saveSuccess": {
-    "message": "Settings saved successfully!"
-  },
-  "unexError": {
-    "message": "❌ Unexpected error: "
-  },
-  "aiFailed": {
-    "message": "AI failed ("
-  },
-  "alternatives": {
-    "message": "). Alternatives:"
-  },
-  "errOpenAI": {
-    "message": "Incorrect OpenAI key or insufficient quota"
-  },
-  "errGemini": {
-    "message": "Incorrect Google key"
-  },
-  "errAnthropic": {
-    "message": "Incorrect Anthropic key"
-  },
-  "errDeepSeek": {
-    "message": "Incorrect DeepSeek key"
-  },
   "errStream": {
     "message": "The streaming connection was interrupted."
   },
-  "modeDef": {
-    "message": "Definition"
+  "errRecognized": {
+    "message": "Unrecognized API format."
   },
-  "modeTrans": {
-    "message": "Translation"
+  "errTranslation": {
+    "message": "Could not translate text."
   },
-  "btnDef": {
-    "message": "Define"
+  "errFreeTrans": {
+    "message": "Error in free translation service."
   },
-  "btnTrans": {
-    "message": "Translate"
+  "errVerifyKey": {
+    "message": "Verify your Endpoint and API Key."
   },
-  "optTitle": {
-    "message": "Settings | HoverMind"
+  "errVerifyAnthropic": {
+    "message": "Verify your Anthropic API Key."
   },
-  "optSubheader": {
-    "message": "Configure your providers and manage available AI models."
+  "errVerifyGemini": {
+    "message": "Verify your Gemini API Key."
   },
-  "optKeysTitle": {
-    "message": "🔑 Access Keys (API Keys)"
+  "btnBack": {
+    "message": "Back"
   },
-  "optSaveKeysBtn": {
-    "message": "Save Keys"
-  },
-  "optKeysSuccess": {
-    "message": "Keys saved successfully!"
-  },
-  "optMgrTitle": {
-    "message": "🧠 Model Manager (BYOM)"
-  },
-  "optMgrDesc": {
-    "message": "These models will appear in the floating toolbar when selecting text."
-  },
-  "tblName": {
-    "message": "Display Name"
-  },
-  "tblProvider": {
-    "message": "Provider"
-  },
-  "tblApiId": {
-    "message": "API ID"
-  },
-  "tblActions": {
-    "message": "Actions"
-  },
-  "phName": {
-    "message": "E.g. Fast GPT-4"
-  },
-  "phApiId": {
-    "message": "E.g. gpt-4o-mini"
-  },
-  "btnAdd": {
-    "message": "Add"
-  },
-  "btnUpdate": {
-    "message": "Update"
-  },
-  "btnCancel": {
-    "message": "Cancel"
-  },
-  "confirmDelete": {
-    "message": "Are you sure you want to delete the model"
-  },
-  "alertFill": {
-    "message": "Please fill in the Name and API ID."
-  },
-  "optCacheTitle": {
-    "message": "🗄️ Response Cache"
-  },
-  "optCacheDesc": {
-    "message": "Manage the history of cached texts to save tokens."
-  },
-  "btnEmptyCache": {
-    "message": "Empty All Cache"
-  },
-  "tblCacheText": {
-    "message": "Original Text"
-  },
-  "tblCacheResponse": {
-    "message": "Saved Response"
-  },
-  "tblCacheDate": {
-    "message": "Date"
-  },
-  "optGeneralTitle": {
-    "message": "⚙️ General Settings"
-  },
-  "optDefLang": {
-    "message": "Default Language:"
-  },
-  "optLangEs": {
-    "message": "Spanish (ES)"
-  },
-  "optLangEn": {
-    "message": "English (EN)"
-  },
-  "optDefAction": {
-    "message": "Default Action:"
-  },
-  "optActionTrans": {
-    "message": "🌐 Translate"
-  },
-  "optActionDef": {
-    "message": "✨ Define (AI)"
-  },
-  "optSaveGeneralBtn": {
-    "message": "Save General Settings"
-  },
-  "optGeneralSuccess": {
-    "message": "Settings saved!"
+  "noResults": {
+    "message": "No results found..."
   },
   "tbTransText": {
     "message": "🌐 Translate text"
@@ -173,20 +53,11 @@
   "tbDefModelLabel": {
     "message": "✨ Define with AI Model:"
   },
-  "tbLangEs": {
-    "message": "Spanish"
-  },
-  "tbLangEn": {
-    "message": "English"
+  "tbLangLabel": {
+    "message": "Response language:"
   },
   "tbOpenOptions": {
     "message": "Open Options Panel ↗"
-  },
-  "tbBtnTrans": {
-    "message": "Translate"
-  },
-  "tbBtnDef": {
-    "message": "Define"
   },
   "tbSettingsTooltip": {
     "message": "Query Settings"
@@ -194,7 +65,112 @@
   "tbCloseTooltip": {
     "message": "Close"
   },
-  "tblDefault": {
-    "message": "Default"
+  "optTitle": {
+    "message": "Settings | HoverMind"
+  },
+  "optAjustesTitle": {
+    "message": "✨ HoverMind Settings"
+  },
+  "optAiTitle": {
+    "message": "🤖 AI Providers & Models"
+  },
+  "optAiDesc": {
+    "message": "Add the APIs you want to use. Only one configuration can be active at a time."
+  },
+  "optProviderOpenAI": {
+    "message": "OpenAI Compatible (AIMLAPI, OpenRouter, DeepSeek, Groq, Local...)"
+  },
+  "optProviderAnthropic": {
+    "message": "Anthropic (Claude)"
+  },
+  "optProviderGemini": {
+    "message": "Google Gemini"
+  },
+  "optAddApi": {
+    "message": "+ Add new API..."
+  },
+  "optSaveAiBtn": {
+    "message": "Save API Configuration"
+  },
+  "optHistorialTitle": {
+    "message": "🗂️ History & Cache"
+  },
+  "optHistorialDesc": {
+    "message": "The extension saves AI responses locally to speed up repeated queries and save API requests. You can manage your history here."
+  },
+  "optClearCacheBtn": {
+    "message": "Clear all cache"
+  },
+  "cacheEmpty": {
+    "message": "Cache is empty."
+  },
+  "cacheTraduccion": {
+    "message": "Translation"
+  },
+  "cacheDefinicion": {
+    "message": "Definition"
+  },
+  "cacheShowMore": {
+    "message": "⬇ Show more"
+  },
+  "cacheShowLess": {
+    "message": "⬆ Show less"
+  },
+  "cacheConfirmClear": {
+    "message": "Are you sure you want to clear the response history? The next time you select the same texts, the AI will consume your API credits."
+  },
+  "cacheDatePrefix": {
+    "message": "Saved on: "
+  },
+  "rowNoApis": {
+    "message": "No APIs configured. Select one below."
+  },
+  "rowEndpoint": {
+    "message": "Endpoint URL:"
+  },
+  "rowApiKey": {
+    "message": "API Key:"
+  },
+  "rowModelName": {
+    "message": "Model Name:"
+  },
+  "rowDelete": {
+    "message": "Delete configuration"
+  },
+  "statusSaved": {
+    "message": "Configuration saved successfully!"
+  },
+  "privTitle": {
+    "message": "Privacy Policy | HoverMind"
+  },
+  "privHeader": {
+    "message": "HoverMind Privacy Policy"
+  },
+  "privLastUpdated": {
+    "message": "Last updated: March 2026"
+  },
+  "privSection1Title": {
+    "message": "1. Data Collection"
+  },
+  "privSection1Desc": {
+    "message": "HoverMind ('the Extension') does not collect, transmit, distribute, or sell any personal data of the user to developers or third parties."
+  },
+  "privSection2Title": {
+    "message": "2. Local Storage"
+  },
+  "privSection2Desc": {
+    "message": "All information necessary for the operation of the Extension, including API keys, user preferences, model configuration, and history of cached texts, is stored locally and encrypted on the user's device using native browser tools (Chrome Storage)."
+  },
+  "privSection3Title": {
+    "message": "3. Interaction with Third-Party Services"
+  },
+  "privSection3Desc": {
+    "message": "When the user selects text and requests a definition or translation, the Extension sends that text directly to the APIs of the providers configured by the user (such as OpenAI, Google Gemini, Anthropic, DeepSeek, or MyMemory). The treatment of that information is subject to the individual privacy policies of those providers. The Extension does not act as an intermediary or store these communications outside of the local device."
+  },
+  "privSection4Title": {
+    "message": "4. Changes to the Privacy Policy"
+  },
+  "privSection4Desc": {
+    "message": "Any future changes to this policy will be reflected on this same page and notified in the Extension release notes."
   }
 }

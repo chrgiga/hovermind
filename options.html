@@ -1,464 +1,169 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuración | HoverMind</title>
+    <title data-i18n="optTitle">Settings | HoverMind</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f3f4f6;
+            background: #f3f4f6;
             color: #1f2937;
-            display: flex;
-            justify-content: center;
-            padding: 40px 20px;
             margin: 0;
+            padding: 40px 20px;
         }
 
         .container {
-            width: 100%;
-            max-width: 700px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .card {
-            background-color: #ffffff;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         h1 {
-            margin-top: 0;
             color: #4f46e5;
+            margin-bottom: 30px;
             font-size: 24px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
-        h2 {
-            margin-top: 0;
-            font-size: 18px;
-            color: #374151;
-            border-bottom: 2px solid #f3f4f6;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-
-        .keys-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 6px;
-            font-size: 13px;
-            color: #4b5563;
-        }
-
-        input[type="password"],
-        input[type="text"],
-        select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 13px;
-        }
-
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th {
-            text-align: left;
-            background: #f9fafb;
-            padding: 10px;
-            font-size: 13px;
-            color: #6b7280;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        td {
-            padding: 10px;
-            border-bottom: 1px solid #f3f4f6;
-            font-size: 14px;
-            vertical-align: middle;
-        }
-
-        .row-add {
-            background: #f8fafc;
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
         }
 
         .btn-primary {
-            background-color: #4f46e5;
+            background: #4f46e5;
             color: white;
             border: none;
-            padding: 10px 16px;
+            padding: 10px 20px;
             border-radius: 6px;
-            font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
-            width: 100%;
+            font-weight: bold;
+            transition: background 0.2s;
         }
 
         .btn-primary:hover {
-            background-color: #4338ca;
+            background: #4338ca;
         }
 
-        .btn-add {
-            background-color: #10b981;
+        .btn-danger {
+            background: #ef4444;
             color: white;
             border: none;
-            padding: 8px 12px;
+            padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            width: 100%;
+            transition: background 0.2s;
         }
 
-        .btn-add:hover {
-            background-color: #059669;
+        .btn-danger:hover {
+            background: #dc2626;
         }
 
-        /* --- NUEVOS ESTILOS DE BOTONES E ICONOS --- */
-        .action-cell {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            justify-content: flex-start;
-        }
-
-        .btn-edit {
-            color: #f59e0b;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            padding: 2px;
-            transition: transform 0.1s;
-        }
-
-        .btn-edit:hover {
-            transform: scale(1.2);
-        }
-
-        .btn-delete {
-            color: #ef4444;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            padding: 2px;
-            transition: transform 0.1s;
-        }
-
-        .btn-delete:hover {
-            transform: scale(1.2);
-        }
-
-        .btn-cancel {
-            background-color: #6b7280;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-            margin-top: 6px;
-            display: none;
-        }
-
-        .btn-cancel:hover {
-            background-color: #4b5563;
-        }
-
-        #statusMessage {
-            text-align: center;
-            font-size: 14px;
-            font-weight: 600;
-            min-height: 20px;
-            margin-top: 10px;
-        }
-
-        .success {
-            color: #10b981;
-        }
-
-        /* Drag & Drop */
-        .drag-handle {
-            cursor: grab;
-            color: #9ca3af;
-            font-size: 16px;
-            text-align: center;
-            user-select: none;
-        }
-
-        .drag-handle:active {
-            cursor: grabbing;
-        }
-
-        .dragging {
-            opacity: 0.5;
-            background-color: #f9fafb;
-        }
-
-        .drag-over {
-            border-top: 2px dashed #4f46e5;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .modal-overlay.show {
-            display: flex;
-            opacity: 1;
-        }
-
-        .modal-content {
-            background: #fff;
-            width: 90%;
-            max-width: 600px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            max-height: 85vh;
-            transform: scale(0.95);
-            transition: transform 0.2s;
-        }
-
-        .modal-overlay.show .modal-content {
-            transform: scale(1);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 20px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .modal-header h3 {
-            margin: 0;
-            font-size: 18px;
-            color: #374151;
-        }
-
-        .btn-close-modal {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #6b7280;
-            line-height: 1;
-            padding: 0;
-        }
-
-        .btn-close-modal:hover {
-            color: #ef4444;
-        }
-
-        .modal-body {
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .modal-body h4 {
-            margin: 0 0 8px 0;
-            font-size: 14px;
-            color: #4f46e5;
-        }
-
-        .modal-text-box {
-            background: #f9fafb;
+        /* Cache Styles */
+        .cache-item {
             border: 1px solid #e5e7eb;
             border-radius: 6px;
-            padding: 12px;
-            font-size: 14px;
-            color: #1f2937;
-            margin-bottom: 20px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            line-height: 1.5;
+            padding: 15px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: #ffffff;
+            transition: box-shadow 0.2s;
+        }
+
+        .cache-item:hover {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-color: #d1d5db;
+        }
+
+        .cache-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: #111827;
+            margin-bottom: 6px;
+        }
+
+        .cache-text {
+            font-size: 13px;
+            color: #4b5563;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            margin-bottom: 8px;
+            background: #f9fafb;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #f3f4f6;
+        }
+
+        .cache-meta {
+            font-size: 11px;
+            color: #9ca3af;
         }
     </style>
 </head>
 
 <body>
-
     <div class="container">
-        <div>
-            <h1>✨ HoverMind</h1>
-            <p style="font-size: 14px; color: #4b5563; margin: 0;" data-i18n="optSubheader"></p>
-        </div>
+        <h1 data-i18n="optAjustesTitle">✨ HoverMind Settings</h1>
 
+        <!-- CARD: AI CONFIGURATION -->
         <div class="card">
-            <h2 data-i18n="optGeneralTitle">⚙️ Ajustes Generales</h2>
-            <div class="keys-grid">
-                <div class="form-group">
-                    <label data-i18n="optDefLang">Idioma por defecto:</label>
-                    <select id="defaultLang">
-                        <option value="es" data-i18n="optLangEs">Español (ES)</option>
-                        <option value="en" data-i18n="optLangEn">Inglés (EN)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label data-i18n="optDefAction">Acción por defecto:</label>
-                    <select id="defaultAction">
-                        <option value="translation" data-i18n="optActionTrans">🌐 Traducir</option>
-                        <option value="definition" data-i18n="optActionDef">✨ Definir (IA)</option>
-                    </select>
-                </div>
+            <h2 data-i18n="optAiTitle">🤖 AI Providers & Models</h2>
+            <p data-i18n="optAiDesc" style="color: #6b7280; font-size: 14px; margin-bottom: 20px;">
+                Add the APIs you want to use. <strong>Only one configuration can be active</strong> at a time.
+            </p>
+
+            <!-- ROWS CONTAINER -->
+            <div id="ai-rows-container" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+                <!-- Rows will be injected here via JS -->
             </div>
-            <button id="saveGeneralBtn" class="btn-primary" style="margin-top: 15px;"
-                data-i18n="optSaveGeneralBtn">Guardar Ajustes Generales</button>
-            <div id="generalStatusMessage"
+
+            <!-- AUTOMATIC SELECTOR TO ADD (Now moved below) -->
+            <div style="background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px dashed #d1d5db;">
+                <select id="newProviderSelect"
+                    style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #d1d5db; cursor: pointer; font-weight: 600; color: #4f46e5; background-color: white; outline: none;">
+                    <option value="" disabled selected data-i18n="optAddApi">+ Add new API...</option>
+                    <option value="openai" data-i18n="optProviderOpenAI">OpenAI Compatible (AIMLAPI, OpenRouter,
+                        DeepSeek, Groq, Local...)
+                    </option>
+                    <option value="anthropic" data-i18n="optProviderAnthropic">Anthropic (Claude)</option>
+                    <option value="gemini" data-i18n="optProviderGemini">Google Gemini</option>
+                </select>
+            </div>
+
+            <button id="saveAiBtn" class="btn-primary" data-i18n="optSaveAiBtn"
+                style="margin-top: 25px; width: 100%; padding: 12px; font-size: 16px;">Save API Configuration</button>
+            <div id="aiStatusMessage"
                 style="text-align: center; font-size: 14px; font-weight: 600; min-height: 20px; margin-top: 10px;">
             </div>
         </div>
 
+        <!-- CARD: CACHE AND HISTORY -->
         <div class="card">
-            <h2 data-i18n="optKeysTitle"></h2>
-            <div class="keys-grid">
-                <div class="form-group">
-                    <label>Google Gemini</label>
-                    <input type="password" id="geminiKey" placeholder="AIzaSy...">
-                </div>
-                <div class="form-group">
-                    <label>OpenAI (ChatGPT)</label>
-                    <input type="password" id="openaiKey" placeholder="sk-...">
-                </div>
-                <div class="form-group">
-                    <label>Anthropic (Claude)</label>
-                    <input type="password" id="anthropicKey" placeholder="sk-ant-...">
-                </div>
-                <div class="form-group">
-                    <label>DeepSeek</label>
-                    <input type="password" id="deepseekKey" placeholder="sk-...">
-                </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 data-i18n="optHistorialTitle" style="margin: 0;">🗂️ History & Cache</h2>
+                <button id="clearCacheBtn" class="btn-danger" data-i18n="optClearCacheBtn"
+                    style="font-size: 12px;">Clear all cache</button>
             </div>
-            <button id="saveKeysBtn" class="btn-primary" style="margin-top: 20px;" data-i18n="optSaveKeysBtn"></button>
-            <div id="statusMessage"></div>
-        </div>
-
-        <div class="card">
-            <h2 data-i18n="optMgrTitle"></h2>
-            <p style="font-size: 13px; color: #6b7280; margin-top: 0;" data-i18n="optMgrDesc"></p>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 30px;"></th>
-                        <th style="width: 80px; text-align: center;" data-i18n="tblDefault"></th>
-                        <th data-i18n="tblName"></th>
-                        <th data-i18n="tblProvider"></th>
-                        <th data-i18n="tblApiId"></th>
-                        <th style="width: 120px;" data-i18n="tblActions"></th>
-                    </tr>
-                </thead>
-                <tbody id="modelsList">
-                </tbody>
-                <tfoot>
-                    <tr class="row-add">
-                        <td></td>
-                        <td><input type="text" id="newModelName" data-i18n-placeholder="phName"></td>
-                        <td>
-                            <select id="newModelProvider">
-                                <option value="gemini">Gemini</option>
-                                <option value="openai">OpenAI</option>
-                                <option value="anthropic">Anthropic</option>
-                                <option value="deepseek">DeepSeek</option>
-                            </select>
-                        </td>
-                        <td><input type="text" id="newModelId" data-i18n-placeholder="phApiId"></td>
-                        <td>
-                            <button id="addModelBtn" class="btn-add" data-i18n="btnAdd"></button>
-                            <button id="cancelEditBtn" class="btn-cancel" data-i18n="btnCancel"></button>
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-
-        <div class="card">
-            <details>
-                <summary style="font-size: 18px; font-weight: bold; color: #374151; cursor: pointer; outline: none;"
-                    data-i18n="optCacheTitle">🗄️ Caché de Respuestas</summary>
-
-                <div style="margin-top: 15px;">
-                    <p
-                        style="font-size: 13px; color: #6b7280; display: flex; justify-content: space-between; align-items: center;">
-                        <span data-i18n="optCacheDesc">Gestiona el historial de textos cacheados para ahorrar
-                            tokens.</span>
-                        <button id="clearAllCacheBtn" class="btn-delete"
-                            style="background: #fee2e2; padding: 6px 10px; border-radius: 6px;"
-                            data-i18n="btnEmptyCache">Vaciar Toda la Caché</button>
-                    </p>
-
-                    <table>
-                        <thead>
-                            <tr>
-                                <th data-i18n="tblCacheDate">Fecha</th>
-                                <th data-i18n="tblCacheText">Texto Original</th>
-                                <th data-i18n="tblCacheResponse">Respuesta Guardada</th>
-                                <th style="width: 50px;">🗑️</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cacheList">
-                        </tbody>
-                    </table>
-                </div>
-            </details>
-        </div>
-    </div>
-
-    <div id="cacheModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 data-i18n="modalCacheTitle">Detalle de la Caché</h3>
-                <button id="closeModalBtn" class="btn-close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <h4 data-i18n="modalCacheOriginal">Texto Original:</h4>
-                <div id="modalOriginalText" class="modal-text-box"></div>
-                <h4 data-i18n="modalCacheResponse">Respuesta de la IA:</h4>
-                <div id="modalResponseText" class="modal-text-box"></div>
+            <p data-i18n="optHistorialDesc"
+                style="color: #6b7280; font-size: 13px; margin-bottom: 20px; line-height: 1.5;">
+                The extension saves AI responses locally to speed up repeated queries and save API requests. You can
+                manage your history here.
+            </p>
+            <div id="cache-container" style="max-height: 500px; overflow-y: auto; padding-right: 5px;">
+                <!-- Cache items will be injected here -->
             </div>
         </div>
     </div>
-
     <script src="options.js"></script>
 </body>
 

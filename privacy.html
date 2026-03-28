@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Política de Privacidad | HoverMind</title>
+    <title data-i18n="privTitle">Privacy Policy | HoverMind</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -39,29 +39,30 @@
 </head>
 
 <body>
-    <h1>Política de Privacidad de HoverMind</h1>
-    <p class="date">Última actualización: Marzo de 2026</p>
+    <h1 data-i18n="privHeader">HoverMind Privacy Policy</h1>
+    <p class="date" data-i18n="privLastUpdated">Last updated: March 2026</p>
 
-    <h2>1. Recopilación de datos</h2>
-    <p>HoverMind ("la Extensión") no recopila, transmite, distribuye ni vende ningún dato personal del usuario a los
-        desarrolladores ni a terceros.</p>
+    <h2 data-i18n="privSection1Title">1. Data Collection</h2>
+    <p data-i18n="privSection1Desc">HoverMind ("the Extension") does not collect, transmit, distribute, or sell any
+        personal data of the user to developers or third parties.</p>
 
-    <h2>2. Almacenamiento local</h2>
-    <p>Toda la información necesaria para el funcionamiento de la Extensión, incluyendo las claves de acceso a las APIs
-        (API Keys), las preferencias del usuario, la configuración de los modelos y el historial de textos cacheados, se
-        almacena de forma local y cifrada en el dispositivo del usuario utilizando las herramientas nativas del
-        navegador (Chrome Storage).</p>
+    <h2 data-i18n="privSection2Title">2. Local Storage</h2>
+    <p data-i18n="privSection2Desc">All information necessary for the operation of the Extension, including API keys,
+        user preferences, model configuration, and history of cached texts, is stored locally and encrypted on the
+        user's device using native browser tools (Chrome Storage).</p>
 
-    <h2>3. Interacción con servicios de terceros</h2>
-    <p>Cuando el usuario selecciona un texto y solicita una definición o traducción, la Extensión envía dicho texto
-        directamente a las APIs de los proveedores configurados por el usuario (como OpenAI, Google Gemini, Anthropic,
-        DeepSeek o MyMemory). El tratamiento de esa información está sujeto a las políticas de privacidad individuales
-        de dichos proveedores. La Extensión no actúa como intermediario ni almacena estas comunicaciones fuera del
-        dispositivo local.</p>
+    <h2 data-i18n="privSection3Title">3. Interaction with Third-Party Services</h2>
+    <p data-i18n="privSection3Desc">When the user selects text and requests a definition or translation, the Extension
+        sends that text directly to the APIs of the providers configured by the user (such as OpenAI, Google Gemini,
+        Anthropic, DeepSeek, or MyMemory). The treatment of that information is subject to the individual privacy
+        policies of those providers. The Extension does not act as an intermediary or store these communications outside
+        of the local device.</p>
 
-    <h2>4. Cambios en la Política de Privacidad</h2>
-    <p>Cualquier cambio futuro en esta política se reflejará en esta misma página y se notificará en las notas de la
-        versión de la Extensión.</p>
+    <h2 data-i18n="privSection4Title">4. Changes to the Privacy Policy</h2>
+    <p data-i18n="privSection4Desc">Any future changes to this policy will be reflected on this same page and notified
+        in the Extension release notes.</p>
+
+    <script src="privacy.js"></script>
 </body>
 
 </html>
